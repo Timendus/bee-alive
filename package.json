@@ -1,0 +1,40 @@
+{
+  "name": "plumbing",
+  "version": "0.0.1",
+  "description": "Hacking something together as a base for a real-time multiplayer game",
+  "main": "index.js",
+  "configuration": {
+    "server": {
+      "port": 8000,
+      "verbose": true
+    }
+  },
+  "scripts": {
+    "start": "concurrently \"nodemon server/index.js\" \"webpack\"",
+    "build": "webpack --mode production",
+    "test": "standard && mocha --recursive --watch"
+  },
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "express-session": "^1.17.0",
+    "form-data": "^3.0.0",
+    "socket.io": "^2.3.0",
+    "uuid": "^3.3.3"
+  },
+  "devDependencies": {
+    "concurrently": "^5.0.0",
+    "nodemon": "^1.19.3",
+    "socket.io-client": "^2.3.0",
+    "thimbleful": "^1.0.0",
+    "webpack": "^4.41.0",
+    "webpack-cli": "^3.3.9",
+    "webpack-dev-server": "^3.8.2"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "client/*",
+      "public/*"
+    ]
+  }
+}
