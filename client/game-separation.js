@@ -63,6 +63,7 @@ export default function gameSeparation(socket, joinCallback, leaveCallback) {
     document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
     document.getElementById('game').classList.add('active');
     document.querySelector('#game h2').innerHTML = `"Game" ${game}`;
+    document.getElementById('invite-link').innerHTML = `<a href='${document.location}'>${document.location}</a>`;
     socket.emit('players');
 
     joinCallback(game);
