@@ -11,8 +11,7 @@
   },
   "scripts": {
     "start": "concurrently \"nodemon server/index.js\" \"webpack\"",
-    "build": "webpack --mode production",
-    "test": "standard && mocha --recursive --watch"
+    "build": "webpack --mode production"
   },
   "dependencies": {
     "body-parser": "^1.19.0",
