@@ -1,5 +1,5 @@
 import io from './socketio';
-import gameSeparation from './game-separation';
+import GameSeparation from './game-separation';
 
 window.addEventListener('load', () => {
 
@@ -7,13 +7,16 @@ window.addEventListener('load', () => {
   const messageForm = document.getElementById('message');
 
   const socket = io.game();
-  const currentGame = gameSeparation(socket, newGame => {
+  const gameSep = new GameSeparation(socket);
+
+  gameSep.addEventListener('join', () => {
     messages.innerHTML = 'Messages here';
   });
 
   messageForm.addEventListener('submit', e => {
     const input = messageForm.querySelector('input');
-    socket.emit('message', { game: currentGame(), message: input.value });
+    console.log(gameSep.currentGame());
+    socket.emit('message', { game: gameSep.currentGame(), message: input.value });
     input.value = '';
     e.preventDefault();
   });
