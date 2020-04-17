@@ -19,12 +19,14 @@ module.exports = async io => {
       io.emit('list', games);
 
       // Tell everyone in this game who the players are
-      io.in(game).emit('players', await playersInGame(game));
+      const players = await playersInGame(game);
+      io.to(game).emit('players', players);
     });
 
     socket.on('join', async game => {
       if ( !games.includes(game) ) {
-        return socket.emit('err', 'Sorry, this game doesn\'t exist (anymore)');
+        socket.emit('err', 'Sorry, this game doesn\'t exist (anymore)');
+        return;
       }
 
       socket.join(game);
@@ -33,7 +35,8 @@ module.exports = async io => {
       socket.emit('game-joined', game);
 
       // Tell everyone in this game who the players are
-      io.in(game).emit('players', await playersInGame(game));
+      const players = await playersInGame(game);
+      io.to(game).emit('players', players);
     });
 
     socket.on('list', () => {
@@ -45,12 +48,11 @@ module.exports = async io => {
 
       // Tell everyone in this game who the players are
       const players = await playersInGame(game);
-      io.in(game).emit('players', players);
+      io.to(game).emit('players', players);
 
       if ( games.includes(game) && players.length == 0 ) {
-        games.splice(games.indexOf(game), 1);
-        // Tell everyone the game has disappeared
-        io.emit('list', games);
+        games.splice(games.indexOf(game), 1); // Remove this game from the list
+        io.emit('list', games);               // Tell everyone the game has disappeared
         console.log("Cleaned up game", game);
       }
     });
