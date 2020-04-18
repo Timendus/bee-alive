@@ -35,6 +35,7 @@ window.addEventListener('load', () => {
 
     room.addEventListener('chatMessage', msg => {
       roomMessages.innerHTML += `${msg}\n`;
+      roomMessages.scrollTop = roomMessages.scrollHeight;
     });
 
     room.addEventListener('leave', () => {
@@ -57,6 +58,7 @@ window.addEventListener('load', () => {
 
   lobby.addEventListener('chatMessage', msg => {
     lobbyMessages.innerHTML += `${msg}\n`;
+    lobbyMessages.scrollTop = lobbyMessages.scrollHeight;
   });
 
   // UI events
