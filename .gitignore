@@ -2,3 +2,4 @@ node_modules
 .DS_Store
 public/index.js
 yarn-error.log
+package-lock.json

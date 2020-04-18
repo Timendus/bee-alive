@@ -1,7 +1,7 @@
 import io from 'socket.io-client';
 
-const game = io('/game');
+const room = io('/room');
 
 export default {
-  game: () => game
+  room: () => room
 }
