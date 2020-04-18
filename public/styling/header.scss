@@ -1,10 +1,12 @@
+@import './colours';
+
 header {
 
   height: 4em;
   overflow: hidden;
   box-sizing: content-box;
 
-  border-bottom: 4px solid #ffe72d;
+  border-bottom: 4px solid $darkYellow;
 
   .game-name {
     width: 100%;
@@ -31,11 +33,11 @@ header {
     position: absolute;
     height: 4em;
 
-    background: rgb(255, 240, 121);
+    background: $yellow;
   }
 
   polygon {
-    fill: rgb(255, 240, 121);
+    fill: $yellow;
     stroke-width: 1;
     stroke: #ffe72d;
   }
