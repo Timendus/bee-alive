@@ -48,15 +48,15 @@ export default class Room {
 
   _attachServerEvents() {
     const playersList  = document.getElementById('players');
-    const roomsList    = document.getElementById('rooms');
+    const roomsList    = document.getElementById('games');
 
     this._socket.on('room-joined', room => {
       this._currentRoom = room;
       document.location.hash = room;
 
       document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
-      document.getElementById('room').classList.add('active');
-      document.querySelector('#room h2').innerHTML = `Room ${room}`;
+      document.getElementById('game').classList.add('active');
+      document.querySelector('#game h2').innerHTML = `Room ${room}`;
       document.getElementById('invite-link').innerHTML = `<a href='${document.location}'>${document.location}</a>`;
 
       this._fireEvent('join', room);
