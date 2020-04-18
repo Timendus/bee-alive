@@ -14,7 +14,8 @@ window.addEventListener('load', () => {
   const joinForm      = document.getElementById('join');
   const roomsList     = document.getElementById('games');
   const playersList   = document.getElementById('players');
-  const renderer      = new Renderer();
+  const gameSize      = 1024;
+  const renderer      = new Renderer({ gameSize });
 
   // Room events
 
@@ -46,13 +47,15 @@ window.addEventListener('load', () => {
     });
 
     // TODO: move this?
-    renderer.setRenderCallback((progress, ctx) => {
-      ctx.fillRect(10, 10, 30, 30);
+    renderer.setRenderCallback((progress, ctx, scale) => {
+      ctx.fillRect(10 * scale, 10 * scale, 30 * scale, 30 * scale);
       const simulator = room.simulator;
       const gameState = simulator.getCurrentState();
 
+      const playerSize = Math.max(1, 10 * scale);
+
       for (const player of gameState.players) {
-        ctx.fillRect(player.position.x, player.position.y, 10, 10);
+        ctx.fillRect(player.position.x * scale, player.position.y * scale, playerSize, playerSize);
       }
     });
     renderer.startRenderLoop();

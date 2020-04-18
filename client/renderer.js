@@ -1,7 +1,12 @@
 class Renderer {
-  constructor(canvasWrapperId = 'canvas-wrapper', canvasId = 'canvas') {
+  constructor({
+    canvasWrapperId = 'canvas-wrapper',
+    canvasId = 'canvas',
+    gameSize = 1024
+  }) {
     this._canvasWrapper = document.getElementById(canvasWrapperId);
     this._canvas = document.getElementById(canvasId);
+    this._gameSize = gameSize;
 
     if (!this._canvasWrapper) throw new Error('canvas wrapper element not found');
     if (!this._canvas) throw new Error('canvas element not found');
@@ -19,6 +24,8 @@ class Renderer {
 
     this._width = size;
     this._height = size;
+
+    this._scale = size / this._gameSize;
 
     this._canvas.setAttribute('width', this._width);
     this._canvas.setAttribute('height', this._height);
@@ -65,7 +72,7 @@ class Renderer {
 
     // do the work
     if (this._cb) {
-      this._cb(progress, this._ctx);
+      this._cb(progress, this._ctx, this._scale);
     }
 
     if (this._rendering) {
