@@ -24,10 +24,10 @@ window.addEventListener('load', () => {
 
     // TODO: move this?
     let renderer = new Renderer();
-    renderer.startRenderLoop();
     renderer.setRenderCallback((progress, ctx) => {
       ctx.fillRect(10, 10, 30, 30);
     });
+    renderer.startRenderLoop();
   });
 
   lobby.addEventListener('leave', id => {
