@@ -1,5 +1,6 @@
 const { Lobby } = require('./room');
 const Renderer = require('./renderer');
+const Textures = require('./textures');
 
 window.addEventListener('load', () => {
 
@@ -48,14 +49,13 @@ window.addEventListener('load', () => {
 
     // TODO: move this?
     renderer.setRenderCallback((progress, ctx, scale) => {
-      ctx.fillRect(10 * scale, 10 * scale, 30 * scale, 30 * scale);
       const simulator = room.simulator;
       const gameState = simulator.getCurrentState();
 
-      const playerSize = Math.max(1, 10 * scale);
+      const playerSize = Math.max(5, 25 * scale);
 
       for (const player of gameState.players) {
-        ctx.fillRect(player.position.x * scale, player.position.y * scale, playerSize, playerSize);
+        ctx.drawImage(Textures.player, player.position.x * scale, player.position.y * scale, playerSize, playerSize);
       }
     });
     renderer.startRenderLoop();
