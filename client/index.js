@@ -28,12 +28,12 @@ window.addEventListener('load', () => {
     document.getElementById('game').classList.add('active');
     document.querySelector('#game h2').innerHTML = `Room ${newRoom.roomId}`;
     document.getElementById('invite-link').innerHTML = `<a href='${document.location}'>${document.location}</a>`;
-    roomMessages.innerHTML = 'Messages here';
+    roomMessages.innerHTML = '';
 
     // Attach event handlers to room
 
     room.addEventListener('chatMessage', msg => {
-      roomMessages.innerHTML += `\n${msg}`;
+      roomMessages.innerHTML += `${msg}\n`;
     });
 
     room.addEventListener('leave', () => {
@@ -56,7 +56,7 @@ window.addEventListener('load', () => {
   });
 
   lobby.addEventListener('chatMessage', msg => {
-    lobbyMessages.innerHTML += `\n${msg}`;
+    lobbyMessages.innerHTML += `${msg}\n`;
   });
 
   // UI events
