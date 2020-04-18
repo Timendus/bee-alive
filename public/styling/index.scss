@@ -1,5 +1,6 @@
 * {
   box-sizing: border-box;
+  font-family: 'Indie Flower', 'Tahoma', 'Arial', sans-serif;
 }
 
 html, body, .container {
@@ -9,10 +10,6 @@ html, body, .container {
   height: 100%;
   overflow: auto;
   background-color: #fff9c7;
-}
-
-h1, h2, h3, p, li {
-  font-family: 'Comic Sans', 'Tahoma', 'Arial', sans-serif;
 }
 
 header {
