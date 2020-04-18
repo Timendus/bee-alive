@@ -16,6 +16,7 @@ html, body, .container {
 
 .page {
   display: none;
+  margin-top: calc(4em + 4px);
 }
 .page.active {
   display: block;
