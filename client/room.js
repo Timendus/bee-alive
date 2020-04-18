@@ -5,19 +5,32 @@ export default class Room {
 
   constructor() {
     this._currentRoom = null;
+    this._rooms = [];
+    this._players = [];
     this._events = {
-      'join':    [],
-      'leave':   [],
-      'message': []
+      'join':     [],
+      'leave':    [],
+      'message':  [],
+      'roomList': [],
+      'players':  []
     };
 
-    this._attachUIEvents();
+    this._attachBrowserEvents();
     this._attachServerEvents();
-    this._navigate(); // Trigger on page load
+    socket.emit('list'); // Request room list on load
+    this._navigate();    // Trigger on page load
   }
 
   id() {
     return this._currentRoom;
+  }
+
+  players() {
+    return this._players;
+  }
+
+  roomList() {
+    return this._rooms;
   }
 
   addEventListener(evnt, func) {
@@ -34,64 +47,49 @@ export default class Room {
     });
   }
 
+  create() {
+    socket.emit('create');
+  }
+
+  join(id) {
+    document.location.hash = id;
+  }
+
+  // "Internal" methods
+
   _fireEvent(evnt, ...params) {
     this._events[evnt].forEach(f => f(...params));
   }
 
-  _attachUIEvents() {
-    const createButton = document.getElementById('create');
-    const joinForm     = document.getElementById('join');
-
-    createButton.addEventListener('click', () => {
-      socket.emit('create');
-    });
-
-    joinForm.addEventListener('submit', e => {
-      const room = join.querySelector('input').value;
-      document.location.hash = room;
-      e.preventDefault();
-    });
-
+  _attachBrowserEvents() {
     window.addEventListener('beforeunload', () => this._leaveRoom());
     window.addEventListener('hashchange', () => this._navigate());
   }
 
   _attachServerEvents() {
-    const playersList  = document.getElementById('players');
-    const roomsList    = document.getElementById('games');
-
     socket.on('room-joined', room => {
       this._currentRoom = room;
       document.location.hash = room;
-
-      document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
-      document.getElementById('game').classList.add('active');
-      document.querySelector('#game h2').innerHTML = `Room ${room}`;
-      document.getElementById('invite-link').innerHTML = `<a href='${document.location}'>${document.location}</a>`;
-
       this._fireEvent('join', room);
     });
 
     socket.on('players', players => {
-      playersList.innerHTML = players.map(p => `<li>${p}</li>`)
-                                     .join('');
+      this._players = players;
+      this._fireEvent('players', players);
     });
 
     socket.on('list', list => {
-      roomsList.innerHTML = list.map(room => `<li><a href='#${room}'>${room}</a></li>`)
-                                .join('');
+      this._rooms = list;
+      this._fireEvent('roomList', list);
     });
 
     socket.on('err', msg => {
-      alert(msg);
+      console.error(msg);
     });
 
     socket.on('message', msg => {
       this._fireEvent('message', msg);
     });
-
-    // Request room list on first page load
-    socket.emit('list');
   }
 
   _leaveRoom() {
@@ -104,9 +102,6 @@ export default class Room {
     let hash = window.location.hash;
     if ( hash.startsWith('#') ) hash = hash.substr(1);
     if ( hash == '' ) {
-      // Back to front porch "page"
-      document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
-      document.getElementById('front-porch').classList.add('active');
       this._leaveRoom();
     } else {
       // Go to this room
