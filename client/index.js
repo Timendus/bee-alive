@@ -45,6 +45,9 @@ window.addEventListener('load', () => {
     });
 
     // TODO: move this?
+    renderer.setRenderCallback((progress, ctx) => {
+      ctx.fillRect(10, 10, 30, 30);
+    });
     renderer.startRenderLoop();
   });
 
