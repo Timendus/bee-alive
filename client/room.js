@@ -9,11 +9,11 @@ class Room {
 
   constructor({ roomId }) {
     this.roomId = roomId;
-    this._messenger = new SocketIOMessenger(socket);
-    this._simulator = new Simulator(new BeeGame());
-    this._networkClient = new NetworkClient({
-      messenger: this._messenger,
-      simulator: this._simulator,
+    this.messenger = new SocketIOMessenger(socket);
+    this.simulator = new Simulator(new BeeGame());
+    this.networkClient = new NetworkClient({
+      messenger: this.messenger,
+      simulator: this.simulator,
     });
     this._events = {
       'leave':       [],
@@ -24,8 +24,8 @@ class Room {
   }
 
   close() {
-    this._networkClient.stop();
-    this._messenger.close();
+    this.networkClient.stop();
+    this.messenger.close();
     socket.emit('leave', this.roomId);
     this._fireEvent('leave', this);
   }
