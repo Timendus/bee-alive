@@ -1,11 +1,14 @@
+import io from 'socket.io-client';
+const socket = io('/room');
+
 export default class Room {
 
-  constructor(socket) {
-    this._socket = socket;
+  constructor() {
     this._currentRoom = null;
     this._events = {
-      'join':         [],
-      'leave':        []
+      'join':    [],
+      'leave':   [],
+      'message': []
     };
 
     this._attachUIEvents();
@@ -13,7 +16,7 @@ export default class Room {
     this._navigate(); // Trigger on page load
   }
 
-  currentRoom() {
+  id() {
     return this._currentRoom;
   }
 
@@ -22,6 +25,13 @@ export default class Room {
       throw new Error(`Invalid event: '${evnt}'`);
 
     this._events[evnt].push(func);
+  }
+
+  broadcast(message) {
+    socket.emit('message', {
+      room: this._currentRoom,
+      message
+    });
   }
 
   _fireEvent(evnt, ...params) {
@@ -33,7 +43,7 @@ export default class Room {
     const joinForm     = document.getElementById('join');
 
     createButton.addEventListener('click', () => {
-      this._socket.emit('create');
+      socket.emit('create');
     });
 
     joinForm.addEventListener('submit', e => {
@@ -50,7 +60,7 @@ export default class Room {
     const playersList  = document.getElementById('players');
     const roomsList    = document.getElementById('games');
 
-    this._socket.on('room-joined', room => {
+    socket.on('room-joined', room => {
       this._currentRoom = room;
       document.location.hash = room;
 
@@ -62,27 +72,31 @@ export default class Room {
       this._fireEvent('join', room);
     });
 
-    this._socket.on('players', players => {
+    socket.on('players', players => {
       playersList.innerHTML = players.map(p => `<li>${p}</li>`)
                                      .join('');
     });
 
-    this._socket.on('list', list => {
+    socket.on('list', list => {
       roomsList.innerHTML = list.map(room => `<li><a href='#${room}'>${room}</a></li>`)
                                 .join('');
     });
 
-    this._socket.on('err', msg => {
+    socket.on('err', msg => {
       alert(msg);
     });
 
+    socket.on('message', msg => {
+      this._fireEvent('message', msg);
+    });
+
     // Request room list on first page load
-    this._socket.emit('list');
+    socket.emit('list');
   }
 
   _leaveRoom() {
     if ( !this._currentRoom ) return;
-    this._socket.emit('leave', this._currentRoom);
+    socket.emit('leave', this._currentRoom);
     this._fireEvent('leave', this._currentRoom);
   }
 
@@ -96,7 +110,7 @@ export default class Room {
       this._leaveRoom();
     } else {
       // Go to this room
-      this._socket.emit('join', hash);
+      socket.emit('join', hash);
     }
   }
 
