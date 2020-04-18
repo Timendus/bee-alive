@@ -10,10 +10,17 @@
       border-right: 4px solid #ffe72d;
     }
 
-    #canvas {
-      background: #FFF;
+    #canvas-wrapper {
       width: 100%;
       height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+
+      #canvas {
+        background: #FFF;
+      }
     }
   }
 
