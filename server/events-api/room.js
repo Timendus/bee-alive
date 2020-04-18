@@ -6,14 +6,14 @@ const { BeeGame } = require('../../shared/bee-game')
 
 class Room {
   constructor({ roomId }) {
-    this._roomId = roomId;
+    this.roomId = roomId;
     this._simulator = new Simulator(new BeeGame())
     this._networkServer = new NetworkServer(this._simulator)
   }
 
   joinSocket(socket) {
     this._networkServer.createClient(new SocketIOMessenger(socket));
-    socket.join(this._roomId);
+    socket.join(this.roomId);
   }
 }
 

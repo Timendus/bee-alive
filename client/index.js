@@ -14,10 +14,10 @@ window.addEventListener('load', () => {
   // Room events
 
   lobby.addEventListener('join', room => {
-    console.log("Joined room", id);
+    console.log("Joined room", room.roomId);
     document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
     document.getElementById('game').classList.add('active');
-    document.querySelector('#game h2').innerHTML = `Room ${id}`;
+    document.querySelector('#game h2').innerHTML = `Room ${room.roomId}`;
     document.getElementById('invite-link').innerHTML = `<a href='${document.location}'>${document.location}</a>`;
     messages.innerHTML = 'Messages here';
   });
@@ -49,7 +49,8 @@ window.addEventListener('load', () => {
 
   messageForm.addEventListener('submit', e => {
     const input = messageForm.querySelector('input');
-    room.broadcast(input.value);
+    // room.broadcast(input.value);
+    // TODO: Send chat message to room.
     input.value = '';
     e.preventDefault();
   });

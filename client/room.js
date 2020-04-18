@@ -7,7 +7,7 @@ const { BeeGame } = require('../shared/bee-game')
 
 class Room {
   constructor({ roomId }) {
-    this._roomId = roomId;
+    this.roomId = roomId;
     this._messenger = new SocketIOMessenger(socket);
     this._simulator = new Simulator(new BeeGame());
     this._networkClient = new NetworkClient({
@@ -22,7 +22,7 @@ class Room {
   }
 }
 
-module.exports = class Room {
+class Lobby {
 
   constructor() {
     this._currentRoom = null;
