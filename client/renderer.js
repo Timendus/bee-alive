@@ -12,7 +12,6 @@ class Renderer {
   }
 
   _updateSize() {
-    console.log('updating size');
     this._width = this._canvas.clientWidth;
     this._height = this._canvas.clientHeight;
 
