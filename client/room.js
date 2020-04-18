@@ -1,7 +1,28 @@
-import io from 'socket.io-client';
+const io = require('socket.io-client');
+const { NetworkClient } = require('../shared/network-client');
+const { Simulator } = require("../shared/simulator");
+const { SocketIOMessenger } = require("../shared/socketio-messenger");
 const socket = io('/room');
+const { BeeGame } = require('../shared/bee-game')
 
-export default class Room {
+class Room {
+  constructor({ roomId }) {
+    this._roomId = roomId;
+    this._messenger = new SocketIOMessenger(socket);
+    this._simulator = new Simulator(new BeeGame());
+    this._networkClient = new NetworkClient({
+      messenger: this._messenger,
+      simulator: this._simulator,
+    });
+  }
+
+  close() {
+    this._networkClient.stop();
+    this._messenger.close();
+  }
+}
+
+class Lobby {
 
   constructor() {
     this._currentRoom = null;
@@ -40,13 +61,6 @@ export default class Room {
     this._events[evnt].push(func);
   }
 
-  broadcast(message) {
-    socket.emit('message', {
-      room: this._currentRoom,
-      message
-    });
-  }
-
   create() {
     socket.emit('create');
   }
@@ -67,9 +81,10 @@ export default class Room {
   }
 
   _attachServerEvents() {
-    socket.on('room-joined', room => {
+    socket.on('room-joined', roomId => {
+      document.location.hash = roomId;
+      const room = new Room({ roomId: roomId });
       this._currentRoom = room;
-      document.location.hash = room;
       this._fireEvent('join', room);
     });
 
@@ -109,4 +124,9 @@ export default class Room {
     }
   }
 
+}
+
+module.exports = {
+  Room,
+  Lobby,
 }
