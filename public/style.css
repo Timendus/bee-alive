@@ -25,6 +25,12 @@ header {
   width: 100%;
 }
 
+.user-name {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
 .page {
   display: none;
 }
@@ -44,13 +50,13 @@ header {
   font-weight: bolder;
   color: black;
 }
-svg { 
+svg {
   position: absolute;
   background: rgb(255, 240, 121);
   height: 4em;
 }
-polygon { 
-  fill: rgb(255, 240, 121); 
+polygon {
+  fill: rgb(255, 240, 121);
   stroke-width: 1;
   stroke: #ffe72d;
 }
