@@ -47,6 +47,12 @@ window.addEventListener('load', () => {
     // TODO: move this?
     renderer.setRenderCallback((progress, ctx) => {
       ctx.fillRect(10, 10, 30, 30);
+      const simulator = room.simulator;
+      const gameState = simulator.getCurrentState();
+
+      for (const player of gameState.players) {
+        ctx.fillRect(player.position.x, player.position.y, 10, 10);
+      }
     });
     renderer.startRenderLoop();
   });
