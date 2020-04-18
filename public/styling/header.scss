@@ -36,10 +36,14 @@ header {
     background: $yellow;
   }
 
-  polygon {
-    fill: $yellow;
-    stroke-width: 1;
-    stroke: #ffe72d;
-  }
+}
 
+/**
+ * This needs to be out here because of Firefox bug :(
+ * WEIRD YOU ARE FOX OF FIRE
+ */
+polygon {
+  fill: $yellow;
+  stroke-width: 1;
+  stroke: #ffe72d;
 }
