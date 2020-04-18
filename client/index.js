@@ -34,7 +34,7 @@ window.addEventListener('load', () => {
   });
 
   room.addEventListener('roomList', list => {
-    roomsList.innerHTML = list.map(room => `<li><a href='#${room}'>${room}</a></li>`)
+    roomsList.innerHTML = list.map(room => `<li><a class="room-link" href='#${room}'>${room}</a></li>`)
                               .join('');
   });
 
