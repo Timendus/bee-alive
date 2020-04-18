@@ -1,0 +1,27 @@
+ul {
+
+  li {
+    display: flex;
+
+    list-style: none;
+
+    &:before {
+      content: '';
+      display: inline-block;
+      height: 20px;
+      width: 20px;
+      margin-right: 15px;
+
+      background-image: url(letitbee2.svg);
+      background-repeat: no-repeat;
+      transition: all 0.3s ease;
+    }
+
+    &:hover {
+      &:before {
+        transform: scale(1.1) rotate(-3deg);
+      }
+    }
+  }
+
+}
