@@ -12,8 +12,13 @@ class Room {
   }
 
   joinSocket(socket) {
-    this._networkServer.createClient(new SocketIOMessenger(socket));
+    this._client = this._networkServer.createClient(new SocketIOMessenger(socket));
     socket.join(this.roomId);
+  }
+
+  leaveSocket(socket) {
+    socket.leave(this.roomId);
+    this._networkServer.removeClient(this._client);
   }
 }
 
@@ -46,7 +51,8 @@ module.exports = async io => {
     });
 
     socket.on('leave', async roomId => {
-      socket.leave(roomId);
+      const room = rooms[roomId];
+      room.leaveSocket(socket);
     });
 
     socket.on('roomMessage', message => {
