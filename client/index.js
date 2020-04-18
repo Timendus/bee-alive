@@ -14,6 +14,7 @@ window.addEventListener('load', () => {
   const joinForm      = document.getElementById('join');
   const roomsList     = document.getElementById('games');
   const playersList   = document.getElementById('players');
+  const renderer      = new Renderer();
 
   // Room events
 
@@ -40,15 +41,11 @@ window.addEventListener('load', () => {
       console.log("Left room", room.roomId);
       document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
       document.getElementById('front-porch').classList.add('active');
+      renderer.stopRenderLoop();
     });
 
     // TODO: move this?
-    let renderer = new Renderer();
-    renderer.setRenderCallback((progress, ctx) => {
-      ctx.fillRect(10, 10, 30, 30);
-    });
     renderer.startRenderLoop();
-
   });
 
   lobby.addEventListener('roomList', list => {
