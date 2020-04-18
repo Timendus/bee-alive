@@ -1,8 +1,8 @@
-const Room = require('./room');
+const { Lobby } = require('./room');
 
 window.addEventListener('load', () => {
 
-  const room = new Room();
+  const lobby = new Lobby();
 
   const messages     = document.getElementById('messages');
   const messageForm  = document.getElementById('message');
@@ -13,7 +13,7 @@ window.addEventListener('load', () => {
 
   // Room events
 
-  room.addEventListener('join', id => {
+  lobby.addEventListener('join', room => {
     console.log("Joined room", id);
     document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
     document.getElementById('game').classList.add('active');
@@ -22,33 +22,27 @@ window.addEventListener('load', () => {
     messages.innerHTML = 'Messages here';
   });
 
-  room.addEventListener('leave', id => {
+  lobby.addEventListener('leave', id => {
     console.log("Left room", id);
     document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
     document.getElementById('front-porch').classList.add('active');
   });
 
-  room.addEventListener('message', msg => {
-    console.log("Received message:", msg);
-    messages.innerHTML += '\n'+msg;
+  lobby.addEventListener('roomList', list => {
+    roomsList.innerHTML = list.map(room => `<li><a class="room-link" href='#${room}'>${room}</a></li>`).join('');
   });
 
-  room.addEventListener('roomList', list => {
-    roomsList.innerHTML = list.map(room => `<li><a class="room-link" href='#${room}'>${room}</a></li>`)
-                              .join('');
-  });
-
-  room.addEventListener('players', players => {
-    playersList.innerHTML = players.map(p => `<li>${p}</li>`)
-                                   .join('');
-  });
+  // room.addEventListener('players', players => {
+  //   playersList.innerHTML = players.map(p => `<li>${p}</li>`)
+  //                                  .join('');
+  // });
 
   // UI events
 
-  createButton.addEventListener('click', () => room.create());
+  createButton.addEventListener('click', () => lobby.create());
 
   joinForm.addEventListener('submit', e => {
-    room.join(joinForm.querySelector('input').value);
+    lobby.join(joinForm.querySelector('input').value);
     e.preventDefault();
   });
 

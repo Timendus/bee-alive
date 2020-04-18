@@ -1,60 +1,52 @@
 const { v4: uuid } = require('uuid');
+const { Simulator } = require('../../shared/simulator');
+const { NetworkServer } = require('../../shared/network-server');
+const { SocketIOMessenger } = require('../../shared/socketio-messenger');
+const { BeeGame } = require('../../shared/bee-game')
+
+class Room {
+  constructor({ roomId }) {
+    this._roomId = roomId;
+    this._simulator = new Simulator(new BeeGame())
+    this._networkServer = new NetworkServer(this._simulator)
+  }
+
+  joinSocket(socket) {
+    this._networkServer.createClient(new SocketIOMessenger(socket));
+    socket.join(this._roomId);
+  }
+}
 
 module.exports = async io => {
-
-  let rooms = [];
+  const rooms = {};
 
   io.on('connection', socket => {
 
     socket.on('create', async () => {
-      const room = uuid().substring(0,6).toUpperCase();
-      rooms.push(room);
-      socket.join(room);
-      console.log("Created room", room);
+      const roomId = uuid().substring(0,6).toUpperCase();
+      rooms[roomId] = new Room({ roomId })
+      socket.join(roomId);
+      console.log("Created room", roomId);
 
-      // Tell client it joined this new room
-      socket.emit('room-joined', room);
-
-      // Tell everyone the new room exists
-      io.emit('list', rooms);
-
-      // Tell everyone in this room who the players are
-      const players = await playersInroom(room);
-      io.to(room).emit('players', players);
+      io.emit('list', Object.keys(rooms));
     });
 
-    socket.on('join', async room => {
-      if ( !rooms.includes(room) ) {
+    socket.on('join', async roomId => {
+      if (!rooms[roomId]) {
         socket.emit('err', 'Sorry, this room doesn\'t exist (anymore)');
         return;
       }
-
-      socket.join(room);
-
-      // Tell client it joined this existing room
-      socket.emit('room-joined', room);
-
-      // Tell everyone in this room who the players are
-      const players = await playersInroom(room);
-      io.to(room).emit('players', players);
+      const room = rooms[roomId];
+      socket.emit('room-joined', roomId);
+      room.joinSocket(socket);
     });
 
     socket.on('list', () => {
-      socket.emit('list', rooms);
+      socket.emit('list', Object.keys(rooms));
     });
 
-    socket.on('leave', async room => {
-      socket.leave(room);
-
-      // Tell everyone in this room who the players are
-      const players = await playersInroom(room);
-      io.to(room).emit('players', players);
-
-      if ( rooms.includes(room) && players.length == 0 ) {
-        rooms.splice(rooms.indexOf(room), 1); // Remove this room from the list
-        io.emit('list', rooms);               // Tell everyone the room has disappeared
-        console.log("Cleaned up room", room);
-      }
+    socket.on('leave', async roomId => {
+      socket.leave(roomId);
     });
 
     socket.on('message', ({room, message}) => {
@@ -62,13 +54,4 @@ module.exports = async io => {
     });
 
   });
-
-  function playersInroom(room) {
-    return new Promise((resolve, reject) => {
-      io.in(room).clients((error, clients) => {
-        if (error) reject(error);
-        resolve(clients);
-      });
-    });
-  }
 }
