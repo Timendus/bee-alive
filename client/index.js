@@ -1,22 +1,22 @@
 import io from './socketio';
-import GameSeparation from './game-separation';
+import Room from './room';
 
 window.addEventListener('load', () => {
 
   const messages    = document.getElementById('messages');
   const messageForm = document.getElementById('message');
 
-  const socket = io.game();
-  const gameSep = new GameSeparation(socket);
+  const socket = io.room();
+  const room = new Room(socket);
 
-  gameSep.addEventListener('join', () => {
+  room.addEventListener('join', () => {
     messages.innerHTML = 'Messages here';
   });
 
   messageForm.addEventListener('submit', e => {
     const input = messageForm.querySelector('input');
-    console.log(gameSep.currentGame());
-    socket.emit('message', { game: gameSep.currentGame(), message: input.value });
+    console.log(room.currentRoom());
+    socket.emit('message', { room: room.currentRoom(), message: input.value });
     input.value = '';
     e.preventDefault();
   });
