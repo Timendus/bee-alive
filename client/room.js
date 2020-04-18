@@ -122,6 +122,10 @@ class Lobby {
       this._fireEvent('join', room);
     });
 
+    socket.on('room-created', roomId => {
+      this.join(roomId);
+    });
+
     socket.on('players', players => {
       this._players = players;
       this._fireEvent('players', players);
