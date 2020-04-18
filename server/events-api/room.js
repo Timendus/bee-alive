@@ -33,6 +33,7 @@ module.exports = async io => {
       socket.join(roomId);
       console.log("Created room", roomId);
 
+      socket.emit('room-created', roomId);
       io.emit('list', Object.keys(rooms));
     });
 
