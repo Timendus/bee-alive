@@ -19,12 +19,14 @@ module.exports = async io => {
       io.emit('list', rooms);
 
       // Tell everyone in this room who the players are
-      io.in(room).emit('players', await playersInroom(room));
+      const players = await playersInroom(room);
+      io.to(room).emit('players', players);
     });
 
     socket.on('join', async room => {
       if ( !rooms.includes(room) ) {
-        return socket.emit('err', 'Sorry, this room doesn\'t exist (anymore)');
+        socket.emit('err', 'Sorry, this room doesn\'t exist (anymore)');
+        return;
       }
 
       socket.join(room);
@@ -33,7 +35,8 @@ module.exports = async io => {
       socket.emit('room-joined', room);
 
       // Tell everyone in this room who the players are
-      io.in(room).emit('players', await playersInroom(room));
+      const players = await playersInroom(room);
+      io.to(room).emit('players', players);
     });
 
     socket.on('list', () => {
@@ -45,12 +48,11 @@ module.exports = async io => {
 
       // Tell everyone in this room who the players are
       const players = await playersInroom(room);
-      io.in(room).emit('players', players);
+      io.to(room).emit('players', players);
 
       if ( rooms.includes(room) && players.length == 0 ) {
-        rooms.splice(rooms.indexOf(room), 1);
-        // Tell everyone the room has disappeared
-        io.emit('list', rooms);
+        rooms.splice(rooms.indexOf(room), 1); // Remove this room from the list
+        io.emit('list', rooms);               // Tell everyone the room has disappeared
         console.log("Cleaned up room", room);
       }
     });
