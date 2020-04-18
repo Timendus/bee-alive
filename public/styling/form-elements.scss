@@ -1,0 +1,29 @@
+input {
+  height: 2em;
+  padding: 1px 0.5em;
+
+  border-radius: 8px;
+  border: 1px solid #ffe72d;
+  font-size: 1em;
+}
+
+.button {
+  height: 2em;
+  padding: 1px 0.5em;
+
+  font-size: 1em;
+  background-color: white;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(to right, rgb(255, 240, 121) 50%, white 50%);
+  background-size: 200% 100%;
+  background-position: right bottom;
+
+  transition: all .3s ease-out;
+
+  &:hover {
+    color: black;
+    background-color: rgb(255, 240, 121);
+    background-position: left bottom;
+  }
+}
