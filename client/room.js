@@ -6,6 +6,7 @@ const socket = io('/room');
 const { BeeGame } = require('../shared/bee-game')
 
 class Room {
+
   constructor({ roomId }) {
     this.roomId = roomId;
     this._messenger = new SocketIOMessenger(socket);
@@ -14,12 +15,41 @@ class Room {
       messenger: this._messenger,
       simulator: this._simulator,
     });
+    this._events = {
+      'leave':       [],
+      'chatMessage': []
+    };
+
+    this._attachServerEvents();
   }
 
   close() {
     this._networkClient.stop();
     this._messenger.close();
+    socket.emit('leave', this.roomId);
+    this._fireEvent('leave', this);
   }
+
+  chatMessage(msg) {
+    socket.emit('roomMessage', msg);
+  }
+
+  addEventListener(evnt, func) {
+    if ( !Object.keys(this._events).includes(evnt) )
+      throw new Error(`Invalid event: '${evnt}'`);
+
+    this._events[evnt].push(func);
+  }
+
+  _fireEvent(evnt, ...params) {
+    this._events[evnt].forEach(f => f(...params));
+  }
+
+  _attachServerEvents() {
+    socket.on('roomMessage', msg =>
+      this._fireEvent('chatMessage', msg));
+  }
+
 }
 
 class Lobby {
@@ -29,11 +59,11 @@ class Lobby {
     this._rooms = [];
     this._players = [];
     this._events = {
-      'join':     [],
-      'leave':    [],
-      'message':  [],
-      'roomList': [],
-      'players':  []
+      'join':        [],
+      'leave':       [],
+      'chatMessage': [],
+      'roomList':    [],
+      'players':     []
     };
 
     this._attachBrowserEvents();
@@ -69,6 +99,10 @@ class Lobby {
     document.location.hash = id;
   }
 
+  chatMessage(msg) {
+    socket.emit('lobbyMessage', msg);
+  }
+
   // "Internal" methods
 
   _fireEvent(evnt, ...params) {
@@ -102,15 +136,14 @@ class Lobby {
       console.error(msg);
     });
 
-    socket.on('message', msg => {
-      this._fireEvent('message', msg);
+    socket.on('lobbyMessage', msg => {
+      this._fireEvent('chatMessage', msg);
     });
   }
 
   _leaveRoom() {
     if ( !this._currentRoom ) return;
-    socket.emit('leave', this._currentRoom);
-    this._fireEvent('leave', this._currentRoom);
+    this._currentRoom.close();
   }
 
   _navigate() {
