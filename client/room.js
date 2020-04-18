@@ -1,7 +1,7 @@
-import io from 'socket.io-client';
+const io = require('socket.io-client');
 const socket = io('/room');
 
-export default class Room {
+module.exports = class Room {
 
   constructor() {
     this._currentRoom = null;

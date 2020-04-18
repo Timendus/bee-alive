@@ -1,4 +1,4 @@
-import Room from './room';
+const Room = require('./room');
 
 window.addEventListener('load', () => {
 
