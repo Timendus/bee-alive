@@ -1,10 +1,10 @@
 class Renderer {
-  constructor(canvasId = 'canvas') {
+  constructor(canvasWrapperId = 'canvas-wrapper', canvasId = 'canvas') {
+    this._canvasWrapper = document.getElementById(canvasWrapperId);
     this._canvas = document.getElementById(canvasId);
 
-    if (!this._canvas) {
-      throw new Error('canvas element not found');
-    }
+    if (!this._canvasWrapper) throw new Error('canvas wrapper element not found');
+    if (!this._canvas) throw new Error('canvas element not found');
 
     this._observeResize();
     this._ctx = this._canvas.getContext('2d');
@@ -12,8 +12,13 @@ class Renderer {
   }
 
   _updateSize() {
-    this._width = this._canvas.clientWidth;
-    this._height = this._canvas.clientHeight;
+    const w = this._canvasWrapper.clientWidth;
+    const h = this._canvasWrapper.clientHeight;
+
+    const size = w > h ? h : w;
+
+    this._width = size;
+    this._height = size;
 
     this._canvas.setAttribute('width', this._width);
     this._canvas.setAttribute('height', this._height);
@@ -24,7 +29,7 @@ class Renderer {
       this._updateSize();
     });
 
-    this._resizeObserver.observe(this._canvas);
+    this._resizeObserver.observe(this._canvasWrapper);
   }
 
   setRenderCallback(cb) {
