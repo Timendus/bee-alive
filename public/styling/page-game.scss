@@ -3,7 +3,7 @@
   div {
     display: grid;
     grid-template-columns: 300px 1fr;
-    min-height: calc(100vh - 4em);
+    min-height: calc(100vh - 4em - 4px);
 
     aside {
       padding: 1rem;
