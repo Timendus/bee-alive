@@ -7,35 +7,39 @@
     <link rel="stylesheet" href="/style.css">
   </head>
   <body>
-    <h1>Hello world!</h1>
+    <section class="container">
+      <header>
+        <h1>Hello world!</h1>
+      </header>
 
-    <section class="page active" id="front-porch">
-      <h2>Front porch</h2>
+      <section class="page active" id="front-porch">
+        <h2>Front porch</h2>
 
-      <button id="create">Create a new game</button> or
-      <form id="join" style="display: inline-block;">
-        <input type="text" placeholder="Game ID"/>
-        <button type="submit">Join game</button>
-      </form>
+        <button id="create">Create a new game</button> or
+        <form id="join" style="display: inline-block;">
+          <input type="text" placeholder="Game ID"/>
+          <button type="submit">Join game</button>
+        </form>
 
-      <h3>Public games</h3>
-      <ul id="games"></ul>
-    </section>
+        <h3>Public games</h3>
+        <ul id="games"></ul>
+      </section>
 
-    <section class="page" id="game">
-      <a href="#">&laquo; back</a>
-      <h2>"Game"</h2>
-      <p>Invite your friends by sharing this URL: <span id="invite-link"></span></p>
+      <section class="page" id="game">
+        <a href="#">&laquo; back</a>
+        <h2>"Game"</h2>
+        <p>Invite your friends by sharing this URL: <span id="invite-link"></span></p>
 
-      <h3>Peeps here</h3>
-      <ul id="players"></ul>
+        <h3>Peeps here</h3>
+        <ul id="players"></ul>
 
-      <h3>Messages</h3>
-      <pre id="messages">Messages here</pre>
-      <form id="message">
-        <input type="text" placeholder="Message"/>
-        <button type="submit">Send</button>
-      </form>
+        <h3>Messages</h3>
+        <pre id="messages">Messages here</pre>
+        <form id="message">
+          <input type="text" placeholder="Message"/>
+          <button type="submit">Send</button>
+        </form>
+      </section>
     </section>
   </body>
 </html>
