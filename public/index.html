@@ -34,25 +34,32 @@
       </header>
 
       <section class="page active" id="front-porch">
-        <h2>Front porch</h2>
+        <div>
+          <main>
+            <section class="primary">
+              <button class="button" id="create">Create a new game</button>
+              <span class="or">or</span>
+              <form id="join">
+                <input type="text" placeholder="Game ID"/>
+                <button class="button" type="submit">Join game</button>
+              </form>
+            </section>
 
-        <button class="button" id="create">Create a new game</button> or
-        <form id="join" style="display: inline-block;">
-          <input type="text" placeholder="Game ID"/>
-          <button class="button" type="submit">Join game</button>
-        </form>
+            <section class="secondary">
+              <h3>Public games</h3>
+              <ul id="games"></ul>
+            </section>
+          </main>
 
-        <h3>Public games</h3>
-        <ul id="games"></ul>
-
-        <section class="chat">
-          <h3>Lobby Chat</h3>
-          <pre id="lobbyMessages"></pre>
-          <form id="lobbyChat">
-            <input type="text" placeholder="Message"/>
-            <button class="button"  type="submit">Send</button>
-          </form>
-        </section>
+          <section class="chat">
+            <h3>Lobby Chat</h3>
+            <pre id="lobbyMessages"></pre>
+            <form id="lobbyChat">
+              <input type="text" placeholder="Message"/>
+              <button class="button"  type="submit">Send</button>
+            </form>
+          </section>
+        </div>
       </section>
 
       <section class="page" id="game">
