@@ -4,9 +4,10 @@ const Renderer = require('./renderer');
 window.addEventListener('load', () => {
 
   const lobby = new Lobby();
+  let room = null;
 
-  const messages     = document.getElementById('messages');
-  const messageForm  = document.getElementById('message');
+  const chatMessages = document.getElementById('chatMessages');
+  const chatForm     = document.getElementById('chat');
   const createButton = document.getElementById('create');
   const joinForm     = document.getElementById('join');
   const roomsList    = document.getElementById('games');
@@ -14,13 +15,30 @@ window.addEventListener('load', () => {
 
   // Room events
 
-  lobby.addEventListener('join', room => {
-    console.log("Joined room", room.roomId);
+  lobby.addEventListener('join', newRoom => {
+
+    room = newRoom;
+    console.log("Joined room", newRoom.roomId);
+
+    // Show this room
+
     document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
     document.getElementById('game').classList.add('active');
-    document.querySelector('#game h2').innerHTML = `Room ${room.roomId}`;
+    document.querySelector('#game h2').innerHTML = `Room ${newRoom.roomId}`;
     document.getElementById('invite-link').innerHTML = `<a href='${document.location}'>${document.location}</a>`;
-    messages.innerHTML = 'Messages here';
+    chatMessages.innerHTML = 'Messages here';
+
+    // Attach event handlers to room
+
+    room.addEventListener('chatMessage', msg => {
+      chatMessages.innerHTML += `\n${msg}`;
+    });
+
+    room.addEventListener('leave', () => {
+      console.log("Left room", room.roomId);
+      document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
+      document.getElementById('front-porch').classList.add('active');
+    });
 
     // TODO: move this?
     let renderer = new Renderer();
@@ -28,22 +46,16 @@ window.addEventListener('load', () => {
       ctx.fillRect(10, 10, 30, 30);
     });
     renderer.startRenderLoop();
-  });
 
-  lobby.addEventListener('leave', id => {
-    console.log("Left room", id);
-    document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
-    document.getElementById('front-porch').classList.add('active');
   });
 
   lobby.addEventListener('roomList', list => {
     roomsList.innerHTML = list.map(room => `<li><a class="room-link" href='#${room}'>${room}</a></li>`).join('');
   });
 
-  // room.addEventListener('players', players => {
-  //   playersList.innerHTML = players.map(p => `<li>${p}</li>`)
-  //                                  .join('');
-  // });
+  lobby.addEventListener('chatMessage', msg => {
+    console.log("Lobby: ", msg);
+  });
 
   // UI events
 
@@ -54,10 +66,9 @@ window.addEventListener('load', () => {
     e.preventDefault();
   });
 
-  messageForm.addEventListener('submit', e => {
-    const input = messageForm.querySelector('input');
-    // room.broadcast(input.value);
-    // TODO: Send chat message to room.
+  chatForm.addEventListener('submit', e => {
+    const input = chatForm.querySelector('input');
+    room.chatMessage(input.value);
     input.value = '';
     e.preventDefault();
   });

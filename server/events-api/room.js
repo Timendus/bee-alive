@@ -49,8 +49,15 @@ module.exports = async io => {
       socket.leave(roomId);
     });
 
-    socket.on('message', ({room, message}) => {
-      io.to(room).emit('message', message);
+    socket.on('roomMessage', message => {
+      Object.keys(socket.rooms).forEach(room => {
+        if ( Object.keys(rooms).includes(room) )
+          io.to(room).emit('roomMessage', message);
+      });
+    });
+
+    socket.on('lobbyMessage', message => {
+      io.emit('lobbyMessage', message);
     });
 
   });
