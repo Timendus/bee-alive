@@ -1,4 +1,5 @@
 const { Lobby } = require('./room');
+const Renderer = require('./renderer');
 
 window.addEventListener('load', () => {
 
@@ -20,6 +21,13 @@ window.addEventListener('load', () => {
     document.querySelector('#game h2').innerHTML = `Room ${room.roomId}`;
     document.getElementById('invite-link').innerHTML = `<a href='${document.location}'>${document.location}</a>`;
     messages.innerHTML = 'Messages here';
+
+    // TODO: move this?
+    let renderer = new Renderer();
+    renderer.startRenderLoop();
+    renderer.setRenderCallback((progress, ctx) => {
+      ctx.fillRect(10, 10, 30, 30);
+    });
   });
 
   lobby.addEventListener('leave', id => {
