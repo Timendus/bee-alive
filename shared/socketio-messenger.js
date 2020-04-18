@@ -18,7 +18,7 @@ class SocketIOMessenger {
   }
 
   close() {
-    this.socket.close();
+    // this.socket.close();
   }
 }
 
