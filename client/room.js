@@ -22,7 +22,7 @@ class Room {
   }
 }
 
-class Lobby {
+module.exports = class Room {
 
   constructor() {
     this._currentRoom = null;
