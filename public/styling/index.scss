@@ -53,7 +53,6 @@ input {
 li{
   list-style: none;
   display: flex;
-  transition: all 0.3s ease;
 }
 
 li:before{
@@ -64,6 +63,7 @@ li:before{
   background-image: url(letitbee2.svg);
   background-repeat: no-repeat;
   margin-right: 15px;
+  transition: all 0.3s ease;
 }
 li:hover {
   &:before {
