@@ -121,7 +121,7 @@ class NetworkClient {
 
   handleGameInput({ frame, clientid, input }) {
     this.simulator.insertEvent(frame, {
-      type: "input",
+      type: "game-input",
       input,
       clientid,
     });
