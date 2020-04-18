@@ -13,12 +13,9 @@ class NetworkClient {
 
     this.defaultgamerate = 1000 * (1 / 30);
     this.latencySolving = 0;
-
-    console.log('NetworkClient constructor');
   }
 
   handleMessage(msg) {
-    console.log('msg', msg);
     if (msg.frame && this.simulator.isFramePrehistoric(msg.frame)) {
       // We should not be receiving pre-historic frames. We could be receiving
       // them while stopping the connection, but should not be receiving any
@@ -61,7 +58,6 @@ class NetworkClient {
 
   // General message handlers.
   handleInitialize(msg) {
-    console.log('initialize!');
     this.clientid = msg.clientid;
 
     this.simulator.resetState(msg.state, msg.events);
