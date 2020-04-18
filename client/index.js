@@ -1,5 +1,6 @@
 const { Lobby } = require('./room');
 const Renderer = require('./renderer');
+const Input = require('./input');
 
 window.addEventListener('load', () => {
 
@@ -15,6 +16,7 @@ window.addEventListener('load', () => {
   const roomsList     = document.getElementById('games');
   const playersList   = document.getElementById('players');
   const renderer      = new Renderer();
+  const input         = new Input('canvas');
 
   // Room events
 
@@ -43,6 +45,7 @@ window.addEventListener('load', () => {
       document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
       document.getElementById('front-porch').classList.add('active');
       renderer.stopRenderLoop();
+      input.removeListeners();
     });
 
     // TODO: move this?
@@ -56,6 +59,7 @@ window.addEventListener('load', () => {
       }
     });
     renderer.startRenderLoop();
+    input.attachListeners(room);
   });
 
   lobby.addEventListener('roomList', list => {
