@@ -29,8 +29,7 @@ window.addEventListener('load', () => {
   });
 
   lobby.addEventListener('roomList', list => {
-    roomsList.innerHTML = list.map(room => `<li><a href='#${room}'>${room}</a></li>`)
-                              .join('');
+    roomsList.innerHTML = list.map(room => `<li><a class="room-link" href='#${room}'>${room}</a></li>`).join('');
   });
 
   // room.addEventListener('players', players => {
