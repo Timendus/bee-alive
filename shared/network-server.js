@@ -62,6 +62,17 @@ class NetworkServer {
     const clientIndex = this.clients.indexOf(client);
     if (clientIndex === -1) { return; }
     this.clients.splice(clientIndex, 1);
+
+    this.simulator.pushEvent({
+      type: "disconnect",
+      clientid: client.id,
+    });
+    client.broadcast({
+      type: "disconnect",
+      clientid: client.id,
+      frame: this.simulator.getCurrentFrame(),
+    });
+
     if (this.onclientremoved) {
       this.onclientremoved(client);
     }
