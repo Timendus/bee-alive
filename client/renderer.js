@@ -1,3 +1,5 @@
+const Polyfill = require('@juggle/resize-observer').ResizeObserver;
+
 class Renderer {
   constructor({
     canvasWrapperId = 'canvas-wrapper',
@@ -32,6 +34,7 @@ class Renderer {
   }
 
   _observeResize() {
+    const ResizeObserver = window.ResizeObserver || Polyfill;
     this._resizeObserver = new ResizeObserver(() => {
       this._updateSize();
     });
