@@ -24,6 +24,10 @@ class Room {
     socket.leave(this.roomId);
     this._networkServer.removeClient(socket.networkClient);
   }
+
+  close() {
+    this._networkServer.close();
+  }
 }
 
 module.exports = async io => {
@@ -50,25 +54,22 @@ module.exports = async io => {
       }
       const room = rooms[roomId];
       socket.emit('room-joined', roomId);
-      room.joinSocket(socket, playerName(socket));
+      room.joinSocket(socket, playerName(socket.id));
+      updatePlayerList(roomId);
     });
 
-    socket.on('list', () => {
+    socket.on('init', () => {
       socket.emit('list', Object.keys(rooms));
+      updateLobbyPlayerList();
     });
 
     socket.on('leave', async roomId => {
-      const room = rooms[roomId];
-      if (!room) { return }
-      room.leaveSocket(socket);
+      leave(socket, roomId);
     });
 
     socket.on('disconnect', () => {
-      for (const roomId of Object.keys(socket.rooms)) {
-        const room = rooms[roomId];
-        if (!room) { return }
-        room.leaveSocket(socket);
-      }
+      Object.keys(socket.rooms)
+            .forEach(roomId => leave(socket, roomId));
     })
 
     socket.on('roomMessage', message => {
@@ -77,7 +78,7 @@ module.exports = async io => {
         if ( Object.keys(rooms).includes(room) )
           io.to(room).emit('roomMessage', {
             client:   socket.id,
-            userName: playerName(socket),
+            userName: playerName(socket.id),
             message
           });
       });
@@ -87,26 +88,80 @@ module.exports = async io => {
       message = htmlEntities(message);
       io.emit('lobbyMessage', {
         client:   socket.id,
-        userName: playerName(socket),
+        userName: playerName(socket.id),
         message
       });
     });
 
-    socket.on('setName', name => {
+    socket.on('setName', async name => {
       name = htmlEntities(name);
       playerNames[socket.id] = name;
-      console.log(playerNames);
+      Object.keys(socket.rooms).forEach(roomId => {
+        updatePlayerList(roomId);
+      });
     });
 
   });
 
-  function playerName(socket) {
-    return playerNames[socket.id] ||
-      "Anonymous Player " + socket.id.substr(-3).toUpperCase();
+  async function leave(socket, roomId) {
+    const room = rooms[roomId];
+    if (!room) { return }
+    room.leaveSocket(socket);
+    updatePlayerList(roomId);
+
+    const players = await playersInroom(room.roomId);
+    if ( players.length === 0 ) {
+      room.close();
+      delete rooms[room.roomId];           // Remove this room from the list
+      io.emit('list', Object.keys(rooms)); // Tell everyone the room has disappeared
+      console.log("Cleaned up room", room.roomId);
+    }
+  }
+
+  // Tell everyone in this room who the players are
+  async function updatePlayerList(roomId) {
+    const players = await playersInroom(roomId);
+    io.to(roomId).emit('players', players);
+    updateLobbyPlayerList()
+  }
+
+  async function updateLobbyPlayerList() {
+    const players = await playersInLobby();
+    io.emit('lobbyPlayers', players);
+  }
+
+  function playerName(socketId) {
+    return playerNames[socketId] ||
+      "Anonymous Player " + socketId.substr(-3).toUpperCase();
   }
 
   function htmlEntities(str) {
       return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function playersInroom(room) {
+    return new Promise((resolve, reject) => {
+      io.in(room).clients((error, clients) => {
+        if (error) reject(error);
+        resolve(clients.map(c => ({
+          client: c,
+          userName: playerName(c)
+        })));
+      });
+    });
+  }
+
+  function playersInLobby() {
+    return new Promise((resolve, reject) => {
+      io.clients((error, clients) => {
+        if (error) reject(error);
+        resolve(clients.map(c => ({
+          client: c,
+          userName: playerName(c),
+          inRoom: Object.keys(io.connected[c].rooms).length > 1
+        })));
+      })
+    });
   }
 
 }

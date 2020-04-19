@@ -52,14 +52,22 @@
             </section>
           </main>
 
-          <section class="chat">
-            <h3>Lobby Chat</h3>
-            <div class="messages" id="lobbyMessages"></div>
-            <form id="lobbyChat">
-              <input type="text" placeholder="Message"/>
-              <button class="button"  type="submit">Send</button>
-            </form>
-          </section>
+          <aside>
+            <section class="chat">
+              <h3>Lobby Chat</h3>
+              <div class="messages" id="lobbyMessages"></div>
+              <form id="lobbyChat">
+                <input type="text" placeholder="Message"/>
+                <button class="button"  type="submit">Send</button>
+              </form>
+            </section>
+
+            <h3>Peeps here</h3>
+            <ul id="lobbyPlayers">
+              <li>Nobody here :(</li>
+            </ul>
+          </aside>
+
           <footer></footer>
         </div>
       </section>
@@ -71,9 +79,6 @@
             <h2>"Game"</h2>
             <p>Invite your friends by sharing this URL: <span id="invite-link"></span></p>
 
-            <h3>Peeps here</h3>
-            <ul id="players"></ul>
-
             <section class="chat">
               <h3>In-Game Chat</h3>
               <div class="messages" id="roomMessages"></div>
@@ -82,6 +87,11 @@
                 <button class="button"  type="submit">Send</button>
               </form>
             </section>
+
+            <h3>Peeps here</h3>
+            <ul id="players">
+              <li>Nobody here :(</li>
+            </ul>
           </aside>
           <div id="canvas-wrapper">
             <canvas id="canvas" tabindex="1"></canvas>
