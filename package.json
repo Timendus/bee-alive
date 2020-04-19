@@ -10,7 +10,8 @@
     }
   },
   "scripts": {
-    "start": "concurrently \"nodemon server/index.js\" \"webpack --watch\" \"nodemon -e scss -x 'sass public/styling/index.scss public/index.css'\"",
+    "dev": "concurrently \"nodemon server/index.js\" \"webpack --watch\" \"nodemon -e scss -x 'sass public/styling/index.scss public/index.css'\"",
+    "start": "node server/index.js",
     "build": "webpack --mode production"
   },
   "dependencies": {
