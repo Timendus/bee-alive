@@ -87,7 +87,7 @@ window.addEventListener('load', () => {
   });
 
   lobby.addEventListener('players', players => {
-    lobbyPlayersList.innerHTML = players.map(p => `<li>${p.userName}${p.inRoom ? ' <span>(in a game)</span>' : ''}</li>`)
+    lobbyPlayersList.innerHTML = players.map(p => `<li>${p.userName}${p.inRoom ? '<span>(in a game)</span>' : ''}</li>`)
                                         .join('');
   });
 

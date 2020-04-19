@@ -43,6 +43,10 @@ class Room {
     this._events[evnt].push(func);
   }
 
+  players() {
+    return this._players;
+  }
+
   _fireEvent(evnt, ...params) {
     this._events[evnt].forEach(f => f(...params));
   }
@@ -120,7 +124,8 @@ class Lobby {
 
   getName() {
     return this._name ||
-      "Anonymous Player " + socket.id.substr(-3).toUpperCase();
+      (socket.id && "Anonymous Player " + socket.id.substr(-3).toUpperCase() ) ||
+      "Problem";
   }
 
   // "Internal" methods
