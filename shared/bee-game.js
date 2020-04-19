@@ -15,18 +15,30 @@ class BeeGame {
   }
 
   update(state, events) {
-    const newState = {
-      ...events.reduce(handleEvent, state),
+    state = events.reduce(handleEvent, state)
+    state = {
+      ...state,
       frame: state.frame + 1,
+      players: state.players.map(player => updatePlayer(player)),
       boids: updateBoids(state.boids),
     };
-    log.debug("Update state", { oldState: state, newState, events });
-    return newState;
+    log.debug("Update state", { state, events });
+    return state;
   }
 }
 
 const maxSpeed = 2;
 const maxForce = 0.03;
+
+function updatePlayer(player) {
+  return {
+    ...player,
+    position: addV(player.position, {
+      x: (player.input['right'] ? 1 : 0) - (player.input['left'] ? 1 : 0),
+      y: (player.input['down'] ? 1 : 0) - (player.input['up'] ? 1 : 0),
+    })
+  }
+}
 
 function updateBoids(boids) {
   return boids.map((boid) => updateBoid(boid, boids));
@@ -181,7 +193,7 @@ function handleEvent(state, event) {
 function handlePlayerEvent(players, event) {
   switch (event.type) {
     case "connect":
-      return [...players, { id: event.clientid, position: zeroV }];
+      return [...players, { id: event.clientid, position: zeroV, input: {} }];
     case "disconnect":
       return players.filter((player) => player.id !== event.clientid);
     case "game-input":
@@ -198,10 +210,10 @@ function handlePlayerEvent(players, event) {
 function handlePlayerInput(player, input) {
   return {
     ...player,
-    position: addV(player.position, {
-      x: (input === "right" ? 1 : 0) - (input === "left" ? 1 : 0),
-      y: (input === "down" ? 1 : 0) - (input === "up" ? 1 : 0),
-    }),
+    input: {
+      ...player.input,
+      [input.key]: input.direction === 'down',
+    }
   };
 }
 

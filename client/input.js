@@ -1,5 +1,6 @@
 class Input {
   constructor(canvasId = 'canvas') {
+    this.state = {};
     this._canvas = document.getElementById(canvasId);
 
     if (!this._canvas) throw new Error('canvas element not found');
@@ -9,27 +10,32 @@ class Input {
     this.removeListeners();
   }
 
-  handleInput(e) {
-    e.preventDefault();
-    let gameInput;
-    switch (e.key) {
+  getInputName(key) {
+    switch (key) {
       case 'w':
-        gameInput = 'up';
-        break;
+        return 'up';
       case 'a':
-        gameInput = 'left';
-        break;
+        return 'left';
       case 's':
-        gameInput = 'down';
-        break;
+        return 'down';
       case 'd':
-        gameInput = 'right';
-        break;
+        return 'right';
+      default:
+        return null;
     }
+  }
 
-    if (gameInput) {
-      this._room.networkClient.gameInput(gameInput);
-    }
+  _handleKeyEvent(direction, e) {
+    e.preventDefault();
+    const currentDirection = this.state[e.key];
+    if (currentDirection === direction) { return; }
+    this.state[e.key] = direction;
+    const keyName = this.getInputName(e.key);
+    if (!keyName) { return; }
+    this._room.networkClient.gameInput({
+      key: keyName,
+      direction
+    });
   }
 
   attachListeners(room) {
@@ -37,8 +43,9 @@ class Input {
 
     this._room = room;
 
-    this._handler = e => this.handleInput(e);
-    this._canvas.addEventListener('keydown', this._handler);
+
+    this._canvas.addEventListener('keydown', this._handleKeyEvent.bind(this, 'down'));
+    this._canvas.addEventListener('keyup', this._handleKeyEvent.bind(this, 'up'));
   }
 
   removeListeners() {
