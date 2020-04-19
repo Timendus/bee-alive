@@ -60,8 +60,8 @@ function updatePlayer(player) {
   return {
     ...player,
     position: addV(player.position, {
-      x: (player.input['right'] ? 1 : 0) - (player.input['left'] ? 1 : 0),
-      y: (player.input['down'] ? 1 : 0) - (player.input['up'] ? 1 : 0),
+      x: (player.input['right'] ? 4 : 0) - (player.input['left'] ? 4 : 0),
+      y: (player.input['down'] ? 4 : 0) - (player.input['up'] ? 4 : 0),
     })
   }
 }
