@@ -26,15 +26,23 @@
        <div class="game-name">
         <h1>Bee Alive!</h1>
        </div>
-       <div class="user-name">
-         <label>
-          Your name:
-          <input type="text" id="user-name"/>
-        </label>
-       </div>
       </header>
 
-      <section class="page active" id="front-porch">
+      <section class="page active" id="user-name-selection">
+        <div class="flex">
+          <div class="center">
+            <h1>Hey there!</h1>
+            <p>Welcome to Bee Alive! Our submission to <a href="https://ldjam.com/">Ludum Dare 46</a>. This year's theme is "Keep It Alive".</p>
+            <p>What is your name?</p>
+            <form id="user-name">
+              <input type="text" placeholder="Your name here"/>
+              <button class="button" type="submit">Start!</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="front-porch">
         <div class="grid">
           <main>
             <section class="primary">
