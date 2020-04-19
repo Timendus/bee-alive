@@ -35,7 +35,7 @@ class BeeGame {
       ...state,
       frame: state.frame + 1,
       players: state.players.map(player => updatePlayer(player)),
-      boids: updateBoids(state.boids),
+      boids: updateBoids(state.boids, { players: state.players }),
     };
     log.debug("Update state", { state, events });
     return state;
@@ -66,8 +66,8 @@ function updatePlayer(player) {
   }
 }
 
-function updateBoids(boids) {
-  return boids.map((boid) => updateBoid(boid, boids));
+function updateBoids(boids, { players }) {
+  return boids.map((boid) => updateBoid(boid, { boids, players }));
 }
 
 function getSeparation(boid, boids) {
@@ -151,15 +151,36 @@ function getCohesion(boid, boids) {
   return steer;
 }
 
-function updateBoid(boid, boids) {
+function updateBoid(boid, { boids, players }) {
   const separationV = getSeparation(boid, boids);
   const alignmentV = getAlignment(boid, boids);
   const cohesionV = getCohesion(boid, boids);
-  const acceleration = [
+  let acceleration = [
     multiplyV(separationV, 1.5),
-    multiplyV(alignmentV, 1.0),
+    multiplyV(alignmentV, 1.5),
     multiplyV(cohesionV, 1.0),
   ].reduce(addV, zeroV);
+
+  // Move towards closest player.
+  let closestPlayerDistance = Number.POSITIVE_INFINITY;
+  let closestPlayer = null;
+  for (const player of players) {
+    const distance = distanceV(player.position, boid.position);
+    if (distance < closestPlayerDistance) {
+      closestPlayer = player;
+      closestPlayerDistance = distance;
+    }
+  }
+  if (closestPlayer) {
+    const directionTowardPlayer = normalizeV(substractV(closestPlayer.position, boid.position));
+    acceleration = addV(acceleration, multiplyV(directionTowardPlayer, 50));
+  }
+
+  // Drag
+  // acceleration = addV(acceleration, multiplyV(boid.velocity, -0.01));
+
+  // ?
+  acceleration = multiplyV(acceleration, 0.01);
   return {
     ...boid,
     position: addV(boid.position, boid.velocity),
