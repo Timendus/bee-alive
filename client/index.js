@@ -1,7 +1,7 @@
 const { Lobby } = require('./room');
 const Renderer = require('./renderer');
 const Input = require('./input');
-const drawing = require('./drawing');
+const draw = require('./draw');
 
 function drawImage(ctx, image, x, y, scale, rotation){
   ctx.setTransform(scale, 0, 0, scale, x, y); // sets scale and origin
@@ -69,7 +69,7 @@ window.addEventListener('load', () => {
     });
 
     renderer.setRenderCallback((progress, ctx, scale) =>
-      drawing({progress, ctx, scale, simulator: room.simulator}));
+      draw({progress, ctx, scale, simulator: room.simulator}));
 
     renderer.startRenderLoop();
     input.attachListeners(room);
