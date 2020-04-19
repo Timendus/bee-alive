@@ -117,7 +117,7 @@ function getAlignment(boid, boids) {
   sum = multiplyV(sum, 1 / count);
   sum = normalizeV(sum);
   sum = multiplyV(sum, maxSpeed);
-  steer = substractV(sum, boid.velocity);
+  let steer = substractV(sum, boid.velocity);
   steer = limitV(steer, maxForce);
   return steer;
 }
