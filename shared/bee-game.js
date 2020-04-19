@@ -197,9 +197,9 @@ function updateBoid(boid, boids) {
   const alignmentV = getAlignment(boid, boids, { neighborDistance: 50 });
   const cohesionV = getCohesion(boid, boids, { neighborDistance: 100 });
   let acceleration = [
-    multiplyV(separationV, 0.000001),
-    multiplyV(alignmentV, 0.00001),
-    multiplyV(cohesionV, 0.000001),
+    multiplyV(separationV, 0.0000015),
+    multiplyV(alignmentV,  0.000001),
+    multiplyV(cohesionV,   0.000005),
   ].reduce(addV, zeroV);
 
   // Drag
