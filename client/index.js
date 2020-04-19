@@ -3,23 +3,30 @@ const Renderer = require('./renderer');
 const Input = require('./input');
 const Textures = require('./textures');
 
+function drawImage(ctx, image, x, y, scale, rotation){
+  ctx.setTransform(scale, 0, 0, scale, x, y); // sets scale and origin
+  ctx.rotate(rotation);
+  ctx.drawImage(image, -image.width / 2, -image.height / 2);
+}
+
 window.addEventListener('load', () => {
 
   const lobby = new Lobby();
   let room = null;
 
-  const roomMessages  = document.getElementById('roomMessages');
-  const roomChat      = document.getElementById('roomChat');
-  const lobbyMessages = document.getElementById('lobbyMessages');
-  const lobbyChat     = document.getElementById('lobbyChat');
-  const createButton  = document.getElementById('create');
-  const joinForm      = document.getElementById('join');
-  const roomsList     = document.getElementById('games');
-  const playersList   = document.getElementById('players');
-  const userName      = document.getElementById('user-name');
-  const input         = new Input('canvas');
-  const gameSize      = 1024;
-  const renderer      = new Renderer({ gameSize });
+  const roomMessages     = document.getElementById('roomMessages');
+  const roomChat         = document.getElementById('roomChat');
+  const lobbyMessages    = document.getElementById('lobbyMessages');
+  const lobbyChat        = document.getElementById('lobbyChat');
+  const createButton     = document.getElementById('create');
+  const joinForm         = document.getElementById('join');
+  const roomsList        = document.getElementById('games');
+  const playersList      = document.getElementById('players');
+  const lobbyPlayersList = document.getElementById('lobbyPlayers');
+  const userName         = document.getElementById('user-name');
+  const input            = new Input('canvas');
+  const gameSize         = 1024;
+  const renderer         = new Renderer({ gameSize });
 
   // Room events
 
@@ -37,6 +44,11 @@ window.addEventListener('load', () => {
     roomMessages.innerHTML = '';
 
     // Attach event handlers to room
+
+    room.addEventListener('players', players => {
+      playersList.innerHTML = players.map(p => `<li>${p.userName}</li>`)
+                                     .join('');
+    });
 
     room.addEventListener('chatMessage', msg => {
       roomMessages.innerHTML += `
@@ -63,13 +75,25 @@ window.addEventListener('load', () => {
       const playerSize = Math.max(10, 70 * scale);
       const boidSize = Math.max(5, 35 * scale);
 
+      for (const team of gameState.teams) {
+        ctx.drawImage(Textures[`team${team.id}`].hive, team.position.x * scale - playerSize / 2, team.position.y * scale - playerSize / 2, playerSize, playerSize);
+      }
+
       for (const boid of gameState.boids) {
         // here come dat boid
         ctx.drawImage(Textures[`team${boid.teamId}`].boid, boid.position.x * scale - boidSize / 2, boid.position.y * scale - boidSize / 2, boidSize, boidSize);
       }
 
       for (const player of gameState.players) {
-        ctx.drawImage(Textures[`team${player.teamId}`].player, player.position.x * scale - playerSize / 2, player.position.y * scale - playerSize / 2, playerSize, playerSize);
+        const angle = Math.atan2(player.velocity.x, -player.velocity.y);
+        const x = player.position.x * scale;
+        const y = player.position.y * scale;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+        ctx.translate(-x, -y);
+        ctx.drawImage(Textures[`team${player.teamId}`].player, x - playerSize / 2, y - playerSize / 2, playerSize, playerSize);
+        ctx.restore();
       }
     });
     renderer.startRenderLoop();
@@ -78,6 +102,11 @@ window.addEventListener('load', () => {
 
   lobby.addEventListener('roomList', list => {
     roomsList.innerHTML = list.map(room => `<li><a class="room-link" href='#${room}'>${room}</a></li>`).join('');
+  });
+
+  lobby.addEventListener('players', players => {
+    lobbyPlayersList.innerHTML = players.map(p => `<li>${p.userName}${p.inRoom ? '<span>(in a game)</span>' : ''}</li>`)
+                                        .join('');
   });
 
   lobby.addEventListener('chatMessage', msg => {
@@ -113,9 +142,11 @@ window.addEventListener('load', () => {
     e.preventDefault();
   });
 
-  userName.value = lobby.getName();
-  userName.addEventListener('keyup', () => {
-    lobby.setName(userName.value);
+  userName.addEventListener('submit', e => {
+    lobby.setName(userName.querySelector('input').value);
+    document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
+    document.getElementById('front-porch').classList.add('active');
+    e.preventDefault();
   });
 
 });
