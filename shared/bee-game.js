@@ -139,8 +139,7 @@ function getSeparation(boid, boids) {
   return limitV(multiplyV(normalizeV(steer), maxSpeed), maxForce);
 }
 
-function getAlignment(boid, boids) {
-  const neighborDistance = 50;
+function getAlignment(boid, boids, { neighborDistance }) {
   let sum = zeroV;
   let count = 0;
   for (const other of boids) {
@@ -165,8 +164,7 @@ function getAlignment(boid, boids) {
   return steer;
 }
 
-function getCohesion(boid, boids) {
-  const neighborDistance = 50;
+function getCohesion(boid, boids, { neighborDistance }) {
   let sum = zeroV;
   let count = 0;
   for (const other of boids) {
@@ -195,9 +193,9 @@ function getCohesion(boid, boids) {
 }
 
 function updateBoid(boid, boids) {
-  const separationV = getSeparation(boid, boids);
-  const alignmentV = getAlignment(boid, boids);
-  const cohesionV = getCohesion(boid, boids);
+  const separationV = getSeparation(boid, boids, { desiredSeparation: 20 });
+  const alignmentV = getAlignment(boid, boids, { neighborDistance: 50 });
+  const cohesionV = getCohesion(boid, boids, { neighborDistance: 100 });
   let acceleration = [
     multiplyV(separationV, 0.000001),
     multiplyV(alignmentV, 0.00001),
