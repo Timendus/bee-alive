@@ -15,10 +15,13 @@ function compare(va,vb) {
   return (va > vb) ? 1 : (vb > va ? -1 : 0);
 }
 
-const teamPositions = [
-  createV(64, 512),
-  createV(1024 - 64, 512)
-];
+const teams = [{
+  id: 0,
+  position: createV(64, 512),
+}, {
+  id: 1,
+  position: createV(1024 - 64, 512)
+}];
 
 class BeeGame {
   init() {
@@ -26,16 +29,13 @@ class BeeGame {
       frame: 0,
       players: [],
       boids: [
-        ...createBoidSwarm({
-          center: teamPositions[0],
-          count: 10,
-          teamId: 0,
-        }),
-        ...createBoidSwarm({
-          center: teamPositions[1],
-          count: 10,
-          teamId: 1,
-        }),
+        ...teams.flatMap(team =>
+          createBoidSwarm({
+            center: team.position,
+            count: 10,
+            teamId: team.id,
+          })
+        ),
       ],
     };
     log.debug("Init state", { state });
@@ -109,7 +109,10 @@ function updateBoids(boids, { players }) {
   // We interpret players as 'other surrounding' boids as well.
   const boidsAndPlayers = boids.concat(players);
   const teamIds = [0, 1];
-  const teams = teamIds.map(teamId => boidsAndPlayers.filter(boid => boid.teamId === teamId));
+  const teams = teamIds.map(teamId => ({
+    boids: boidsAndPlayers.filter(boid => boid.teamId === teamId),
+    allies: players.filter(player => player.teamId === teamId),
+  }))
   return boids.map((boid) => updateBoid(boid, teams[boid.teamId]));
 }
 
@@ -139,8 +142,7 @@ function getSeparation(boid, boids) {
   return limitV(multiplyV(normalizeV(steer), maxSpeed), maxForce);
 }
 
-function getAlignment(boid, boids) {
-  const neighborDistance = 50;
+function getAlignment(boid, boids, { neighborDistance }) {
   let sum = zeroV;
   let count = 0;
   for (const other of boids) {
@@ -165,8 +167,7 @@ function getAlignment(boid, boids) {
   return steer;
 }
 
-function getCohesion(boid, boids) {
-  const neighborDistance = 50;
+function getCohesion(boid, boids, { neighborDistance }) {
   let sum = zeroV;
   let count = 0;
   for (const other of boids) {
@@ -194,18 +195,46 @@ function getCohesion(boid, boids) {
   return steer;
 }
 
-function updateBoid(boid, boids) {
-  const separationV = getSeparation(boid, boids);
-  const alignmentV = getAlignment(boid, boids);
-  const cohesionV = getCohesion(boid, boids);
+function getPlayerAttraction(boid, players) {
+  let closestDistance = Number.POSITIVE_INFINITY;
+  let closestPlayer = null;
+  for (const player of players) {
+    const distance = distanceV(boid.position, player.position);
+    if (distance < closestDistance) {
+      closestDistance = distance;
+      closestPlayer = player;
+    }
+  }
+
+  if (!closestPlayer) { return zeroV; }
+  const player = closestPlayer;
+
+  const difference = substractV(player.position, boid.position);
+  const distance = lengthV(difference);
+  const directionTowardPlayer = normalizeV(difference);
+  const clockwise = perpendicularClockwiseV(directionTowardPlayer);
+
+  return [
+    multiplyV(directionTowardPlayer, distance / 100),
+    multiplyV(clockwise, 0.01),
+    multiplyV(player.velocity, 0.01),
+  ].reduce(addV, zeroV);
+}
+
+function updateBoid(boid, { boids, allies }) {
+  const separationV = getSeparation(boid, boids, { desiredSeparation: 20 });
+  const alignmentV = getAlignment(boid, boids, { neighborDistance: 50 });
+  const cohesionV = getCohesion(boid, boids, { neighborDistance: 100 });
+  const playerAttractionV = getPlayerAttraction(boid, allies);
   let acceleration = [
-    multiplyV(separationV, 0.000001),
-    multiplyV(alignmentV, 0.00001),
-    multiplyV(cohesionV, 0.000001),
+    multiplyV(separationV, 0.0000015),
+    multiplyV(alignmentV,  0.000001),
+    multiplyV(cohesionV,   0.000005),
+    multiplyV(playerAttractionV, 1),
   ].reduce(addV, zeroV);
 
   // Drag
-  acceleration = addV(acceleration, multiplyV(boid.velocity, -0.01));
+  acceleration = addV(acceleration, multiplyV(boid.velocity, -0.02));
 
   return {
     ...boid,
@@ -285,8 +314,9 @@ function handleEvent(state, event) {
 }
 
 function createPlayer({ id, teamId = null }) {
-  teamId = teamId || (id % 2)
-  const position = teamPositions[teamId];
+  teamId = teamId || (id % teams.length)
+  const team = teams[teamId];
+  const position = team.position;
   const velocity = zeroV;
   return { id: id, position, velocity, input: {}, teamId };
 }
