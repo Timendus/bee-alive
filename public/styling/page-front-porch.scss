@@ -1,4 +1,5 @@
 @import './colours';
+@import './hive-borders';
 
 #front-porch {
 
@@ -15,6 +16,8 @@
   }
 
   .primary {
+    @include hive-borders($lightYellow, $darkGreen);
+
     width: calc(100% - 4em) ;
     height: 290px;
     padding: 3em 0;
@@ -50,9 +53,10 @@
   }
 
   .secondary {
+    @include hive-borders($lightYellow, $darkYellow);
+
     width: calc(100% - 4em);
     min-height: 300px;
-    padding: 2em 0;
     margin: 4em 0;
 
     background-color: $yellow;
