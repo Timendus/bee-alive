@@ -11,6 +11,10 @@ function drawImage(ctx, image, x, y, scale, rotation){
 
 window.addEventListener('load', () => {
 
+  const music = new Audio('sounds/background-music-1.mp4');
+  music.loop = true;
+  music.play();
+
   const lobby = new Lobby();
   let room = null;
 
