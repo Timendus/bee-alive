@@ -15,14 +15,27 @@ function compare(va,vb) {
   return (va > vb) ? 1 : (vb > va ? -1 : 0);
 }
 
+const teamPositions = [
+  createV(64, 512),
+  createV(1024 - 64, 512)
+];
+
 class BeeGame {
   init() {
     const state = {
       frame: 0,
       players: [],
       boids: [
-        { position: { x: 101, y: 100 }, velocity: { x: 0, y: 1 } },
-        { position: { x: 100, y: 100 }, velocity: { x: 0, y: 0.5 } },
+        ...createBoidSwarm({
+          center: teamPositions[0],
+          count: 10,
+          teamId: 0,
+        }),
+        ...createBoidSwarm({
+          center: teamPositions[1],
+          count: 10,
+          teamId: 1,
+        }),
       ],
     };
     log.debug("Init state", { state });
@@ -54,24 +67,54 @@ class BeeGame {
 }
 
 const maxSpeed = 2;
-const maxForce = 0.03;
+const maxForce = 0.00001;
+
+function createBoidSwarm({ center, count, teamId }) {
+  const boids = [];
+  for (let index = 0; index < count; index++) {
+    const angle = (Math.PI * 2) * index / count;
+    const direction = createV(
+      Math.cos(angle),
+      Math.sin(angle)
+    );
+    const position = addV(center, multiplyV(direction, 50));
+    const velocity = multiplyV(perpendicularClockwiseV(direction), 1);
+    boids.push({
+      position,
+      velocity,
+      teamId,
+    })
+  }
+  return boids;
+}
 
 function updatePlayer(player) {
+  const movement = normalizeV({
+    x: (player.input['right'] ? 1 : 0) - (player.input['left'] ? 1 : 0),
+    y: (player.input['down'] ? 1 : 0) - (player.input['up'] ? 1 : 0),
+  });
+
+  const speed = 1;
+  let velocity = addV(player.velocity, multiplyV(player.velocity, -0.1));
+  velocity = addV(velocity, multiplyV(movement, speed));
+
   return {
     ...player,
-    position: addV(player.position, {
-      x: (player.input['right'] ? 4 : 0) - (player.input['left'] ? 4 : 0),
-      y: (player.input['down'] ? 4 : 0) - (player.input['up'] ? 4 : 0),
-    })
+    position: addV(player.position, velocity),
+    velocity,
   }
 }
 
 function updateBoids(boids, { players }) {
-  return boids.map((boid) => updateBoid(boid, { boids, players }));
+  // We interpret players as 'other surrounding' boids as well.
+  const boidsAndPlayers = boids.concat(players);
+  const teamIds = [0, 1];
+  const teams = teamIds.map(teamId => boidsAndPlayers.filter(boid => boid.teamId === teamId));
+  return boids.map((boid) => updateBoid(boid, teams[boid.teamId]));
 }
 
 function getSeparation(boid, boids) {
-  const desiredSeparation = 25;
+  const desiredSeparation = 10;
   let count = 0;
   let steer = zeroV;
   for (const other of boids) {
@@ -151,36 +194,19 @@ function getCohesion(boid, boids) {
   return steer;
 }
 
-function updateBoid(boid, { boids, players }) {
+function updateBoid(boid, boids) {
   const separationV = getSeparation(boid, boids);
   const alignmentV = getAlignment(boid, boids);
   const cohesionV = getCohesion(boid, boids);
   let acceleration = [
-    multiplyV(separationV, 1.5),
-    multiplyV(alignmentV, 1.5),
-    multiplyV(cohesionV, 1.0),
+    multiplyV(separationV, 0.000001),
+    multiplyV(alignmentV, 0.00001),
+    multiplyV(cohesionV, 0.000001),
   ].reduce(addV, zeroV);
 
-  // Move towards closest player.
-  let closestPlayerDistance = Number.POSITIVE_INFINITY;
-  let closestPlayer = null;
-  for (const player of players) {
-    const distance = distanceV(player.position, boid.position);
-    if (distance < closestPlayerDistance) {
-      closestPlayer = player;
-      closestPlayerDistance = distance;
-    }
-  }
-  if (closestPlayer) {
-    const directionTowardPlayer = normalizeV(substractV(closestPlayer.position, boid.position));
-    acceleration = addV(acceleration, multiplyV(directionTowardPlayer, 50));
-  }
-
   // Drag
-  // acceleration = addV(acceleration, multiplyV(boid.velocity, -0.01));
+  acceleration = addV(acceleration, multiplyV(boid.velocity, -0.01));
 
-  // ?
-  acceleration = multiplyV(acceleration, 0.01);
   return {
     ...boid,
     position: addV(boid.position, boid.velocity),
@@ -189,6 +215,13 @@ function updateBoid(boid, { boids, players }) {
 }
 
 const zeroV = { x: 0, y: 0 };
+
+function floorV(v) {
+  return {
+    x: Math.floor(v.x),
+    y: Math.floor(v.y),
+  }
+}
 
 function createV(x, y) {
   return { x, y };
@@ -225,6 +258,20 @@ function normalizeV(v) {
   return length > 0 ? multiplyV(v, 1 / length) : zeroV;
 }
 
+function perpendicularClockwiseV(v) {
+  return {
+    x: v.y,
+    y: -v.x,
+  }
+}
+
+function perpendicularCounterClockwiseV(v) {
+  return {
+    x: -v.y,
+    y: v.x,
+  }
+}
+
 function limitV(v, limit) {
   const length = lengthV(v);
   return length > limit ? multiplyV(v, 1 / limit) : v;
@@ -237,10 +284,17 @@ function handleEvent(state, event) {
   };
 }
 
+function createPlayer({ id, teamId = null }) {
+  teamId = teamId || (id % 2)
+  const position = teamPositions[teamId];
+  const velocity = zeroV;
+  return { id: id, position, velocity, input: {}, teamId };
+}
+
 function handlePlayerEvent(players, event) {
   switch (event.type) {
     case "connect":
-      return [...players, { id: event.clientid, position: zeroV, input: {} }];
+      return [...players, createPlayer({ id: event.clientid, teamId: event.teamId })]
     case "disconnect":
       return players.filter((player) => player.id !== event.clientid);
     case "game-input":
