@@ -66,8 +66,8 @@ class BeeGame {
   }
 }
 
-const maxSpeed = 2;
-const maxForce = 0.00001;
+const maxSpeed = 1000;
+const maxForce = 0.01;
 
 function createBoidSwarm({ center, count, teamId }) {
   const boids = [];
@@ -215,9 +215,9 @@ function getPlayerAttraction(boid, players) {
   const clockwise = perpendicularClockwiseV(directionTowardPlayer);
 
   return [
-    multiplyV(directionTowardPlayer, distance / 100),
+    multiplyV(directionTowardPlayer, 0.01 * distance),
     multiplyV(clockwise, 0.01),
-    multiplyV(player.velocity, 0.01),
+    // multiplyV(player.velocity, 0.001),
   ].reduce(addV, zeroV);
 }
 
@@ -227,14 +227,14 @@ function updateBoid(boid, { boids, allies }) {
   const cohesionV = getCohesion(boid, boids, { neighborDistance: 100 });
   const playerAttractionV = getPlayerAttraction(boid, allies);
   let acceleration = [
-    multiplyV(separationV, 0.0000015),
+    multiplyV(separationV, 0.000015),
     multiplyV(alignmentV,  0.000001),
-    multiplyV(cohesionV,   0.000005),
+    multiplyV(cohesionV,   0.000001),
     multiplyV(playerAttractionV, 1),
   ].reduce(addV, zeroV);
 
   // Drag
-  acceleration = addV(acceleration, multiplyV(boid.velocity, -0.02));
+  acceleration = addV(acceleration, multiplyV(boid.velocity, -0.05));
 
   return {
     ...boid,
