@@ -70,7 +70,7 @@ window.addEventListener('load', () => {
   });
 
   lobby.addEventListener('chatMessage', msg => {
-    lobbyMessages.innerHTML += `${msg}\n`;
+    lobbyMessages.innerHTML += `<div class="chat-message"><p class="message">${msg}</p><p class="name">Henk</p></div>\n`;
     lobbyMessages.scrollTop = lobbyMessages.scrollHeight;
   });
 
