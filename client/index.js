@@ -56,9 +56,18 @@ window.addEventListener('load', () => {
       const gameState = simulator.getCurrentState();
 
       const playerSize = Math.max(5, 25 * scale);
+      const boidSize = Math.max(2.5, 7.5 * scale);
 
       for (const player of gameState.players) {
         ctx.drawImage(Textures.player, player.position.x * scale, player.position.y * scale, playerSize, playerSize);
+      }
+
+      for (const boid of gameState.boids) {
+        // here come dat boid
+        ctx.beginPath();
+        ctx.arc(boid.position.x, boid.position.y, boidSize, 0, 360);
+        ctx.closePath();
+        ctx.fill();
       }
     });
     renderer.startRenderLoop();
