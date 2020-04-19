@@ -1,49 +1,70 @@
 const Textures = require('./textures');
 
-module.exports = (progress, ctx, scale, simulator) => {
-  const gameState = simulator.getCurrentState();
-  const playerSize = Math.max(10, 70 * scale);
-  const boidSize = Math.max(5, 35 * scale);
+module.exports = frame => {
+  const gameState = frame.simulator.getCurrentState();
 
-  ctx.drawImage(Textures.shared.background, 0, 0, 1024 * scale, 1024 * scale);
+  drawBackground(frame);
 
-  ctx.font = '48px Indie Flower';
-  ctx.textAlign = 'center';
+  if ( gameState.finished )
+    return drawFinishedState(frame, gameState.winning);
 
-  if ( gameState.finished ) {
-    // Really ugly, but compact ;)
-    const winningText = gameState.winning.length > 1 ? "It's a Tie!" :
-      gameState.winning[0].id == 0 ? "The Blue Team Won!" :
-                                     "The Purple Team Won!";
+  drawRemainingTime(frame, gameState.remaining);
+  drawHives(frame, gameState.teams);
+  drawBoids(frame, gameState.boids);
+  drawPlayers(frame, gameState.players);
+}
 
-    // Draw game result to screen and quit
-    ctx.fillText(winningText, 512 * scale, 450 * scale);
-    ctx.font = '30px Indie Flower';
-    ctx.fillText("Press ... some key? ... to play again!", 512 * scale, 520 * scale);
-    return;
+function drawBackground(frame) {
+  frame.ctx.drawImage(Textures.shared.background, 0, 0, 1024 * frame.scale, 1024 * frame.scale);
+}
+
+function drawFinishedState(frame, winning) {
+  // Really ugly, but compact ;)
+  const winningText = winning.length > 1 ? "It's a Tie!" :
+    winning[0].id == 0 ? "The Blue Team Won!" :
+                         "The Purple Team Won!";
+
+  // Draw game result to screen and quit
+  frame.ctx.textAlign = 'center';
+  frame.ctx.font = '48px Indie Flower';
+  frame.ctx.fillText(winningText, 512 * frame.scale, 450 * frame.scale);
+  frame.ctx.font = '30px Indie Flower';
+  frame.ctx.fillText("Press ... some key? ... to play again!", 512 * frame.scale, 520 * frame.scale);
+}
+
+function drawRemainingTime(frame, remaining) {
+  frame.ctx.textAlign = 'center';
+  frame.ctx.font = '48px Indie Flower';
+  const time = new Date((remaining + 30) * 1000 / 30).toISOString().substr(17, 2);
+  frame.ctx.fillText(time, 512 * frame.scale, 50 * frame.scale);
+}
+
+function drawHives(frame, teams) {
+  const hiveSize = Math.max(10, 70 * frame.scale);
+  for (const team of teams) {
+    frame.ctx.drawImage(Textures[`team${team.id}`].hive, team.position.x * frame.scale - hiveSize / 2, team.position.y * frame.scale - hiveSize / 2, hiveSize, hiveSize);
   }
+}
 
-  const time = new Date((gameState.remaining + 30) * 1000 / 30).toISOString().substr(17, 2);
-  ctx.fillText(time, 512 * scale, 50 * scale);
-
-  for (const team of gameState.teams) {
-    ctx.drawImage(Textures[`team${team.id}`].hive, team.position.x * scale - playerSize / 2, team.position.y * scale - playerSize / 2, playerSize, playerSize);
-  }
-
-  for (const boid of gameState.boids) {
+function drawBoids(frame, boids) {
+  const boidSize = Math.max(5, 35 * frame.scale);
+  for (const boid of boids) {
     // here come dat boid
-    ctx.drawImage(Textures[`team${boid.teamId}`].boid, boid.position.x * scale - boidSize / 2, boid.position.y * scale - boidSize / 2, boidSize, boidSize);
+    frame.ctx.drawImage(Textures[`team${boid.teamId}`].boid, boid.position.x * frame.scale - boidSize / 2, boid.position.y * frame.scale - boidSize / 2, boidSize, boidSize);
   }
+}
 
-  for (const player of gameState.players) {
+function drawPlayers(frame, players) {
+  const playerSize = Math.max(10, 70 * frame.scale);
+  for (const player of players) {
     const angle = Math.atan2(player.velocity.x, -player.velocity.y);
-    const x = player.position.x * scale;
-    const y = player.position.y * scale;
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.rotate(angle);
-    ctx.translate(-x, -y);
-    ctx.drawImage(Textures[`team${player.teamId}`].player, x - playerSize / 2, y - playerSize / 2, playerSize, playerSize);
-    ctx.restore();
+    const x = player.position.x * frame.scale;
+    const y = player.position.y * frame.scale;
+    frame.ctx.save();
+    frame.ctx.translate(x, y);
+    frame.ctx.rotate(angle);
+    frame.ctx.translate(-x, -y);
+    frame.ctx.drawImage(Textures[`team${player.teamId}`].player, x - playerSize / 2, y - playerSize / 2, playerSize, playerSize);
+    frame.ctx.restore();
   }
 }

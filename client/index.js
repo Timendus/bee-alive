@@ -68,8 +68,9 @@ window.addEventListener('load', () => {
       input.removeListeners();
     });
 
-    // TODO: move this?
-    renderer.setRenderCallback((progress, ctx, scale) => drawing(progress, ctx, scale, room.simulator));
+    renderer.setRenderCallback((progress, ctx, scale) =>
+      drawing({progress, ctx, scale, simulator: room.simulator}));
+
     renderer.startRenderLoop();
     input.attachListeners(room);
   });
