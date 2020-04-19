@@ -65,7 +65,7 @@ window.addEventListener('load', () => {
       for (const boid of gameState.boids) {
         // here come dat boid
         ctx.beginPath();
-        ctx.arc(boid.position.x, boid.position.y, boidSize, 0, 360);
+        ctx.arc(boid.position.x * scale, boid.position.y * scale, boidSize, 0, 360);
         ctx.closePath();
         ctx.fill();
       }
