@@ -58,7 +58,10 @@ class NetworkServer {
     return client;
   }
   removeClient(client) {
-    utils.remove(this.clients, client);
+    
+    const clientIndex = this.clients.indexOf(client);
+    if (clientIndex === -1) { return; }
+    this.clients.splice(clientIndex, 1);
     if (this.onclientremoved) {
       this.onclientremoved(client);
     }
