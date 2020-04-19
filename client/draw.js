@@ -24,7 +24,6 @@ function drawFinishedState(frame, winning) {
     winning[0].id == 0 ? "The Blue Team Won!" :
                          "The Purple Team Won!";
 
-  // Draw game result to screen and quit
   frame.ctx.textAlign = 'center';
   frame.ctx.font = '48px Indie Flower';
   frame.ctx.fillText(winningText, 512 * frame.scale, 450 * frame.scale);
