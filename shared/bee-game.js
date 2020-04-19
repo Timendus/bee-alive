@@ -109,7 +109,10 @@ function updateBoids(boids, { players }) {
   // We interpret players as 'other surrounding' boids as well.
   const boidsAndPlayers = boids.concat(players);
   const teamIds = [0, 1];
-  const teams = teamIds.map(teamId => boidsAndPlayers.filter(boid => boid.teamId === teamId));
+  const teams = teamIds.map(teamId => ({
+    boids: boidsAndPlayers.filter(boid => boid.teamId === teamId),
+    allies: players.filter(player => player.teamId === teamId),
+  }))
   return boids.map((boid) => updateBoid(boid, teams[boid.teamId]));
 }
 
@@ -192,14 +195,42 @@ function getCohesion(boid, boids, { neighborDistance }) {
   return steer;
 }
 
-function updateBoid(boid, boids) {
+function getPlayerAttraction(boid, players) {
+  let closestDistance = Number.POSITIVE_INFINITY;
+  let closestPlayer = null;
+  for (const player of players) {
+    const distance = distanceV(boid.position, player.position);
+    if (distance < closestDistance) {
+      closestDistance = distance;
+      closestPlayer = player;
+    }
+  }
+
+  if (!closestPlayer) { return zeroV; }
+  const player = closestPlayer;
+
+  const difference = substractV(player.position, boid.position);
+  const distance = lengthV(difference);
+  const directionTowardPlayer = normalizeV(difference);
+  const clockwise = perpendicularClockwiseV(directionTowardPlayer);
+
+  return [
+    multiplyV(directionTowardPlayer, distance / 100),
+    multiplyV(clockwise, 0.01),
+    multiplyV(player.velocity, 0.01),
+  ].reduce(addV, zeroV);
+}
+
+function updateBoid(boid, { boids, allies }) {
   const separationV = getSeparation(boid, boids, { desiredSeparation: 20 });
   const alignmentV = getAlignment(boid, boids, { neighborDistance: 50 });
   const cohesionV = getCohesion(boid, boids, { neighborDistance: 100 });
+  const playerAttractionV = getPlayerAttraction(boid, allies);
   let acceleration = [
     multiplyV(separationV, 0.0000015),
     multiplyV(alignmentV,  0.000001),
     multiplyV(cohesionV,   0.000005),
+    multiplyV(playerAttractionV, 1),
   ].reduce(addV, zeroV);
 
   // Drag
