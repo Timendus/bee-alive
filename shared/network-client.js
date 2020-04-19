@@ -161,13 +161,13 @@ class NetworkClient {
     });
   }
   gameInput(input) {
+    const clientid = this.clientid;
     const frame = this.simulator.getCurrentFrame();
-    this.simulator.pushEvent({
+    this.simulator.insertEvent(frame, {
       type: "game-input",
-      frame,
       input,
-      clientid: this.clientid,
-    })
+      clientid,
+    });
     this.messenger.send({
       type: "game-input",
       frame,

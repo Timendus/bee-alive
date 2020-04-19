@@ -167,10 +167,9 @@ class Client {
   }
 
   handleGameInput({ frame, input }) {
-    this.server.simulator.pushEvent({
+    this.server.simulator.insertEvent(frame, {
       type: "game-input",
       clientid: this.id,
-      frame,
       input,
     });
     this.broadcast({
