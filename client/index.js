@@ -1,5 +1,6 @@
 const { Lobby } = require('./room');
 const Renderer = require('./renderer');
+const Textures = require('./textures');
 
 window.addEventListener('load', () => {
 
@@ -14,7 +15,8 @@ window.addEventListener('load', () => {
   const joinForm      = document.getElementById('join');
   const roomsList     = document.getElementById('games');
   const playersList   = document.getElementById('players');
-  const renderer      = new Renderer();
+  const gameSize      = 1024;
+  const renderer      = new Renderer({ gameSize });
 
   // Room events
 
@@ -46,13 +48,14 @@ window.addEventListener('load', () => {
     });
 
     // TODO: move this?
-    renderer.setRenderCallback((progress, ctx) => {
-      ctx.fillRect(10, 10, 30, 30);
+    renderer.setRenderCallback((progress, ctx, scale) => {
       const simulator = room.simulator;
       const gameState = simulator.getCurrentState();
 
+      const playerSize = Math.max(5, 25 * scale);
+
       for (const player of gameState.players) {
-        ctx.fillRect(player.position.x, player.position.y, 10, 10);
+        ctx.drawImage(Textures.player, player.position.x * scale, player.position.y * scale, playerSize, playerSize);
       }
     });
     renderer.startRenderLoop();
