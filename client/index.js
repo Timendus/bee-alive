@@ -56,11 +56,7 @@ window.addEventListener('load', () => {
       const gameState = simulator.getCurrentState();
 
       const playerSize = Math.max(5, 25 * scale);
-      const boidSize = Math.max(2.5, 7.5 * scale);
-
-      for (const player of gameState.players) {
-        ctx.drawImage(Textures.player, player.position.x * scale - playerSize / 2, player.position.y * scale - playerSize / 2, playerSize, playerSize);
-      }
+      const boidSize = Math.max(1, 5 * scale);
 
       for (const boid of gameState.boids) {
         // here come dat boid
@@ -68,6 +64,10 @@ window.addEventListener('load', () => {
         ctx.arc(boid.position.x * scale, boid.position.y * scale, boidSize, 0, 360);
         ctx.closePath();
         ctx.fill();
+      }
+
+      for (const player of gameState.players) {
+        ctx.drawImage(Textures.player, player.position.x * scale - playerSize / 2, player.position.y * scale - playerSize / 2, playerSize, playerSize);
       }
     });
     renderer.startRenderLoop();
