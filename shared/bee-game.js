@@ -138,8 +138,8 @@ function teamSpread(team) {
   const xCoords = team.boids.map(b => b.position.x);
   const yCoords = team.boids.map(b => b.position.y);
   const boundingBox = {
-    width: Math.max(xCoords) - Math.min(xCoords),
-    height: Math.max(yCoords) - Math.min(yCoords)
+    width: Math.max(...xCoords) - Math.min(...xCoords),
+    height: Math.max(...yCoords) - Math.min(...yCoords)
   };
   boundingBox.surface = boundingBox.width * boundingBox.height;
   return boundingBox.surface;
