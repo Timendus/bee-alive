@@ -11,8 +11,8 @@ class Room {
     this._networkServer = new NetworkServer(this._simulator)
   }
 
-  joinSocket(socket) {
-    this._client = this._networkServer.createClient(new SocketIOMessenger(socket));
+  joinSocket(socket, name) {
+    this._client = this._networkServer.createClient(new SocketIOMessenger(socket), name);
     socket.join(this.roomId);
   }
 
@@ -46,7 +46,7 @@ module.exports = async io => {
       }
       const room = rooms[roomId];
       socket.emit('room-joined', roomId);
-      room.joinSocket(socket);
+      room.joinSocket(socket, playerName(socket));
     });
 
     socket.on('list', () => {

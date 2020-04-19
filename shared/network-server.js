@@ -25,10 +25,11 @@ class NetworkServer {
       .reduce(Math.min, Infinity);
     this.simulator.forgetMomentsBefore(this.stableFrame);
   }
-  createClient(messenger) {
+  createClient(messenger, name) {
     var client = new Client({
       status: Client.STATUS_ACTIVE,
       id: this.newclientid++,
+      name: name,
       server: this,
       messenger: messenger,
       lastframe: this.simulator.getCurrentFrame(),
@@ -60,7 +61,7 @@ class NetworkServer {
     return client;
   }
   removeClient(client) {
-    
+
     const clientIndex = this.clients.indexOf(client);
     if (clientIndex === -1) { return; }
     this.clients.splice(clientIndex, 1);
@@ -95,9 +96,10 @@ class NetworkServer {
 class Client {
   static STATUS_ACTIVE = 0;
   static STATUS_RESETTING = 2;
-  constructor({ status, id, server, messenger, lastFrame }) {
+  constructor({ status, id, name, server, messenger, lastFrame }) {
     this.status = status;
     this.id = id;
+    this.name = name;
     this.server = server;
     this.messenger = messenger;
     this.lastFrame = lastFrame;
