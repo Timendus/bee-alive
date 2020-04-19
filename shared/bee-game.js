@@ -15,10 +15,13 @@ function compare(va,vb) {
   return (va > vb) ? 1 : (vb > va ? -1 : 0);
 }
 
-const teamPositions = [
-  createV(64, 512),
-  createV(1024 - 64, 512)
-];
+const teams = [{
+  id: 0,
+  position: createV(64, 512),
+}, {
+  id: 1,
+  position: createV(1024 - 64, 512)
+}];
 
 class BeeGame {
   init() {
@@ -26,16 +29,13 @@ class BeeGame {
       frame: 0,
       players: [],
       boids: [
-        ...createBoidSwarm({
-          center: teamPositions[0],
-          count: 10,
-          teamId: 0,
-        }),
-        ...createBoidSwarm({
-          center: teamPositions[1],
-          count: 10,
-          teamId: 1,
-        }),
+        ...teams.flatMap(team =>
+          createBoidSwarm({
+            center: team.position,
+            count: 10,
+            teamId: team.id,
+          })
+        ),
       ],
     };
     log.debug("Init state", { state });
@@ -285,8 +285,9 @@ function handleEvent(state, event) {
 }
 
 function createPlayer({ id, teamId = null }) {
-  teamId = teamId || (id % 2)
-  const position = teamPositions[teamId];
+  teamId = teamId || (id % teams.length)
+  const team = teams[teamId];
+  const position = team.position;
   const velocity = zeroV;
   return { id: id, position, velocity, input: {}, teamId };
 }
