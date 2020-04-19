@@ -112,8 +112,66 @@ function updateBoids(boids, { players }) {
   const teams = teamIds.map(teamId => ({
     boids: boidsAndPlayers.filter(boid => boid.teamId === teamId),
     allies: players.filter(player => player.teamId === teamId),
-  }))
+  }));
+
+  const { winner, loser } = duel(teams);
+  takeOverNearestBoid(winner, loser);
+
   return boids.map((boid) => updateBoid(boid, teams[boid.teamId]));
+}
+
+function duel(teams) {
+  if ( teamSpread(teams[0]) > teamSpread(teams[1]) ) {
+    return {
+      winner: teams[1],
+      loser: teams[0]
+    };
+  } else {
+    return {
+      winner: teams[0],
+      loser: teams[1]
+    };
+  }
+}
+
+function teamSpread(team) {
+  const xCoords = team.boids.map(b => b.position.x);
+  const yCoords = team.boids.map(b => b.position.y);
+  const boundingBox = {
+    width: Math.max(...xCoords) - Math.min(...xCoords),
+    height: Math.max(...yCoords) - Math.min(...yCoords)
+  };
+  boundingBox.surface = boundingBox.width * boundingBox.height;
+  return boundingBox.surface;
+}
+
+function teamCenter(team) {
+  let xCoords, yCoords;
+  if ( team.allies.length > 0 ) {
+    xCoords = team.allies.map(a => a.position.x);
+    yCoords = team.allies.map(a => a.position.y);
+  } else {
+    xCoords = team.boids.map(b => b.position.x);
+    yCoords = team.boids.map(b => b.position.y);
+  }
+
+  return {
+    x: xCoords.reduce((sum, x) => sum + x, 0) / xCoords.length,
+    y: yCoords.reduce((sum, y) => sum + y, 0) / yCoords.length
+  }
+}
+
+function takeOverNearestBoid(winner, loser) {
+  // TODO: don't take over all boids ;)
+  const takeOverDistance = 200;
+  const center = teamCenter(winner);
+  for (const boid of loser.boids) {
+    const distance = distanceV(boid.position, center);
+    if (distance >= takeOverDistance) {
+      continue;
+    }
+    boid.teamId = winner.boids[0].teamId;
+  }
 }
 
 function getSeparation(boid, boids) {
