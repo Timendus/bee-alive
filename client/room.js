@@ -46,8 +46,10 @@ class Room {
   }
 
   _attachServerEvents() {
-    socket.on('roomMessage', msg =>
-      this._fireEvent('chatMessage', msg));
+    socket.on('roomMessage', msg => {
+      msg.me = msg.client == socket.id;
+      this._fireEvent('chatMessage', msg);
+    });
   }
 
 }
