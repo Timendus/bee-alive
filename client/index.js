@@ -60,8 +60,7 @@ window.addEventListener('load', () => {
     renderer.setRenderCallback((progress, ctx, scale) => {
       const simulator = room.simulator;
       const gameState = simulator.getCurrentState();
-
-      const playerSize = Math.max(5, 25 * scale);
+      const playerSize = Math.max(5, 70 * scale);
       const boidSize = Math.max(1, 5 * scale);
 
       for (const boid of gameState.boids) {
