@@ -238,8 +238,8 @@ function updateBoid(boid, { boids, allies }) {
 
   return {
     ...boid,
-    position: addV(boid.position, boid.velocity),
-    velocity: addV(boid.velocity, acceleration),
+    position: floorV(addV(boid.position, boid.velocity)),
+    velocity: floorV(addV(boid.velocity, acceleration)),
   };
 }
 
@@ -247,8 +247,8 @@ const zeroV = { x: 0, y: 0 };
 
 function floorV(v) {
   return {
-    x: Math.floor(v.x),
-    y: Math.floor(v.y),
+    x: Math.floor(v.x * 1000) / 1000,
+    y: Math.floor(v.y * 1000) / 1000,
   }
 }
 
