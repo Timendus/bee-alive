@@ -59,7 +59,7 @@ window.addEventListener('load', () => {
       const boidSize = Math.max(2.5, 7.5 * scale);
 
       for (const player of gameState.players) {
-        ctx.drawImage(Textures.player, player.position.x * scale, player.position.y * scale, playerSize, playerSize);
+        ctx.drawImage(Textures.player, player.position.x * scale - playerSize / 2, player.position.y * scale - playerSize / 2, playerSize, playerSize);
       }
 
       for (const boid of gameState.boids) {
