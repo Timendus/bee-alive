@@ -15,30 +15,66 @@
     background-color: $yellow;
   }
 
-  pre {
+  .messages {
     margin: 0;
     padding: 1em;
     flex-grow: 1;
     overflow-y: auto;
+
     .chat-message {
-      background-color: white;
+      position: relative;
+      margin: 0 15px 1em 0;
       padding: 10px;
-      margin-right: 15px;
+
+      background-color: white;
       border-radius: 8px 8px 8px 0;
       border: 1px solid $darkYellow;
+
+      &:before, &:after {
+        content: ' ';
+        position: absolute;
+        left: -10px;
+        bottom: -1px;
+        width: 0px;
+        height: 0px;
+        border-left: 10px solid transparent;
+        border-bottom: 10px solid $darkYellow;
+      }
+
+      &:after {
+        bottom: 0px;
+        left: -8px;
+        border-bottom-color: white;
+      }
+
       p {
         margin: 0;
       }
+
       .name {
         font-style: italic;
+        font-size: 0.7em;
         text-align: right;
         color: grey;
       }
+
       &.mine {
         margin-right: 0;
         margin-left: 15px;
         background-color: #f7f7f7;
         border-radius: 8px 8px 0 8px;
+
+        &:before, &:after {
+          left: auto;
+          right: -10px;
+          border-right: 10px solid transparent;
+          border-left: none;
+        }
+
+        &:after {
+          right: -8px;
+          border-bottom-color: #f7f7f7;
+        }
       }
     }
   }

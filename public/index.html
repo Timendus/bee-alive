@@ -35,7 +35,7 @@
       </header>
 
       <section class="page active" id="front-porch">
-        <div class="front-porch-container">
+        <div class="grid">
           <main>
             <section class="primary">
               <button class="button" id="create">Create a new game</button>
@@ -54,7 +54,7 @@
 
           <section class="chat">
             <h3>Lobby Chat</h3>
-            <pre id="lobbyMessages"></pre>
+            <div class="messages" id="lobbyMessages"></div>
             <form id="lobbyChat">
               <input type="text" placeholder="Message"/>
               <button class="button"  type="submit">Send</button>
@@ -65,7 +65,7 @@
       </section>
 
       <section class="page" id="game">
-        <div>
+        <div class="grid">
           <aside>
             <a href="#">&laquo; back</a>
             <h2>"Game"</h2>
@@ -76,7 +76,7 @@
 
             <section class="chat">
               <h3>In-Game Chat</h3>
-              <pre id="roomMessages"></pre>
+              <div class="messages" id="roomMessages"></div>
               <form id="roomChat">
                 <input type="text" placeholder="Message"/>
                 <button class="button"  type="submit">Send</button>

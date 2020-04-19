@@ -46,8 +46,10 @@ class Room {
   }
 
   _attachServerEvents() {
-    socket.on('roomMessage', msg =>
-      this._fireEvent('chatMessage', msg));
+    socket.on('roomMessage', msg => {
+      msg.me = msg.client == socket.id;
+      this._fireEvent('chatMessage', msg);
+    });
   }
 
 }
@@ -103,6 +105,10 @@ class Lobby {
     socket.emit('lobbyMessage', msg);
   }
 
+  setName(name) {
+    socket.emit('setName', name);
+  }
+
   // "Internal" methods
 
   _fireEvent(evnt, ...params) {
@@ -141,6 +147,7 @@ class Lobby {
     });
 
     socket.on('lobbyMessage', msg => {
+      msg.me = msg.client == socket.id;
       this._fireEvent('chatMessage', msg);
     });
   }
