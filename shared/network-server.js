@@ -1,3 +1,5 @@
+const log = require('../shared/log')
+
 class NetworkServer {
   constructor(simulator) {
     this.simulator = simulator;
