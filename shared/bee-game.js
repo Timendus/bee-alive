@@ -100,8 +100,8 @@ function updatePlayer(player) {
 
   return {
     ...player,
-    position: addV(player.position, velocity),
-    velocity,
+    position: floorV(addV(player.position, velocity)),
+    velocity: floorV(velocity),
   }
 }
 
