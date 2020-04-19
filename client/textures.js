@@ -16,7 +16,13 @@ team1.player.src = 'images/team2_bee.png';
 team1.boid.src = 'images/team2_boid.png';
 team1.hive.src = 'images/beehive-pink-cross.png';
 
+const shared = {
+  background: new Image()
+};
+shared.background.src = 'images/grass.png';
+
 module.exports = {
   team0,
-  team1
+  team1,
+  shared
 };

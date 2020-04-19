@@ -27,6 +27,9 @@ class BeeGame {
   init() {
     const state = {
       frame: 0,
+      remaining: 30 * 30,
+      finished: false,
+      winning: [],
       players: [],
       teams: teams,
       boids: [
@@ -48,6 +51,9 @@ class BeeGame {
     state = {
       ...state,
       frame: state.frame + 1,
+      remaining: state.remaining - 1,
+      finished: state.remaining < 1,
+      winning: winningTeam(state.teams, state.boids),
       players: state.players.map(player => updatePlayer(player)),
       boids: updateBoids(state.boids, { players: state.players }),
     };
@@ -104,6 +110,22 @@ function updatePlayer(player) {
     position: floorV(addV(player.position, velocity)),
     velocity: floorV(velocity),
   }
+}
+
+function winningTeam(teams, boids) {
+  let max = 0;
+  let winners = [];
+  teams.forEach(team => {
+    const numBoids = boids.filter(boid => boid.teamId == team.id).length;
+    if ( numBoids == max ) {
+      winners.push(team);
+    }
+    if ( numBoids > max ) {
+      max = numBoids;
+      winners = [team];
+    }
+  });
+  return winners;
 }
 
 function updateBoids(boids, { players }) {
