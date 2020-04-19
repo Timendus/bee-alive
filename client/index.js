@@ -117,6 +117,7 @@ window.addEventListener('load', () => {
     e.preventDefault();
   });
 
+  userName.value = lobby.getName();
   userName.addEventListener('keyup', () => {
     lobby.setName(userName.value);
   });
