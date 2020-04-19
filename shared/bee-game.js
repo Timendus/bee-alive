@@ -203,7 +203,7 @@ function updateBoid(boid, boids) {
   ].reduce(addV, zeroV);
 
   // Drag
-  acceleration = addV(acceleration, multiplyV(boid.velocity, -0.01));
+  acceleration = addV(acceleration, multiplyV(boid.velocity, -0.02));
 
   return {
     ...boid,
