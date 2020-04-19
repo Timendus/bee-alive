@@ -1,5 +1,20 @@
 const log = require("./log");
 
+const eventTypePriority = {
+  'connect': 1,
+  'game-input': 2,
+  'disconnect': 99
+};
+function compare(va,vb) {
+  if (va === undefined) {
+    if (vb === undefined) { return 0; }
+    return 1;
+  } else if (vb === undefined) {
+    return -1;
+  }
+  return (va > vb) ? 1 : (vb > va ? -1 : 0);
+}
+
 class BeeGame {
   init() {
     const state = {
@@ -15,18 +30,41 @@ class BeeGame {
   }
 
   update(state, events) {
-    const newState = {
-      ...events.reduce(handleEvent, state),
+    state = events.reduce(handleEvent, state)
+    state = {
+      ...state,
       frame: state.frame + 1,
+      players: state.players.map(player => updatePlayer(player)),
       boids: updateBoids(state.boids),
     };
-    log.debug("Update state", { oldState: state, newState, events });
-    return newState;
+    log.debug("Update state", { state, events });
+    return state;
+  }
+
+  compareEvents(ea, eb) {
+    if(!eventTypePriority[ea.type] || !eventTypePriority[eb.type]) {
+      throw new Error(`${ea.type} is not a known event type`);
+    }
+    return compare(eventTypePriority[ea.type], eventTypePriority[eb.type])
+      || compare(ea.clientid, eb.clientid)
+      || compare(ea.input && ea.input.key, eb.input && eb.input.key)
+      || compare(ea.input && ea.input.direction, eb.input && eb.input.direction)
+      || compare(ea.name, eb.name);
   }
 }
 
 const maxSpeed = 2;
 const maxForce = 0.03;
+
+function updatePlayer(player) {
+  return {
+    ...player,
+    position: addV(player.position, {
+      x: (player.input['right'] ? 1 : 0) - (player.input['left'] ? 1 : 0),
+      y: (player.input['down'] ? 1 : 0) - (player.input['up'] ? 1 : 0),
+    })
+  }
+}
 
 function updateBoids(boids) {
   return boids.map((boid) => updateBoid(boid, boids));
@@ -79,7 +117,7 @@ function getAlignment(boid, boids) {
   sum = multiplyV(sum, 1 / count);
   sum = normalizeV(sum);
   sum = multiplyV(sum, maxSpeed);
-  steer = substractV(sum, boid.velocity);
+  let steer = substractV(sum, boid.velocity);
   steer = limitV(steer, maxForce);
   return steer;
 }
@@ -181,7 +219,7 @@ function handleEvent(state, event) {
 function handlePlayerEvent(players, event) {
   switch (event.type) {
     case "connect":
-      return [...players, { id: event.clientid, position: zeroV }];
+      return [...players, { id: event.clientid, position: zeroV, input: {} }];
     case "disconnect":
       return players.filter((player) => player.id !== event.clientid);
     case "game-input":
@@ -198,10 +236,10 @@ function handlePlayerEvent(players, event) {
 function handlePlayerInput(player, input) {
   return {
     ...player,
-    position: addV(player.position, {
-      x: (input === "right" ? 1 : 0) - (input === "left" ? 1 : 0),
-      y: (input === "down" ? 1 : 0) - (input === "up" ? 1 : 0),
-    }),
+    input: {
+      ...player.input,
+      [input.key]: input.direction === 'down',
+    }
   };
 }
 

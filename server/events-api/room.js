@@ -53,6 +53,7 @@ module.exports = async io => {
 
     socket.on('leave', async roomId => {
       const room = rooms[roomId];
+      if (!room) { return }
       room.leaveSocket(socket);
     });
 
