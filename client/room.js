@@ -60,6 +60,7 @@ class Lobby {
     this._currentRoom = null;
     this._rooms = [];
     this._players = [];
+    this._name = false;
     this._events = {
       'join':        [],
       'leave':       [],
@@ -106,7 +107,13 @@ class Lobby {
   }
 
   setName(name) {
+    this._name = name;
     socket.emit('setName', name);
+  }
+
+  getName() {
+    return this._name ||
+      "Anonymous Player " + socket.id.substr(-3).toUpperCase();
   }
 
   // "Internal" methods
