@@ -60,19 +60,16 @@ window.addEventListener('load', () => {
     renderer.setRenderCallback((progress, ctx, scale) => {
       const simulator = room.simulator;
       const gameState = simulator.getCurrentState();
-      const playerSize = Math.max(5, 70 * scale);
-      const boidSize = Math.max(1, 5 * scale);
+      const playerSize = Math.max(10, 70 * scale);
+      const boidSize = Math.max(5, 35 * scale);
 
       for (const boid of gameState.boids) {
         // here come dat boid
-        ctx.beginPath();
-        ctx.arc(boid.position.x * scale, boid.position.y * scale, boidSize, 0, 360);
-        ctx.closePath();
-        ctx.fill();
+        ctx.drawImage(Textures[`team${boid.teamId}`].boid, boid.position.x * scale - boidSize / 2, boid.position.y * scale - boidSize / 2, boidSize, boidSize);
       }
 
       for (const player of gameState.players) {
-        ctx.drawImage(Textures.player, player.position.x * scale - playerSize / 2, player.position.y * scale - playerSize / 2, playerSize, playerSize);
+        ctx.drawImage(Textures[`team${player.teamId}`].player, player.position.x * scale - playerSize / 2, player.position.y * scale - playerSize / 2, playerSize, playerSize);
       }
     });
     renderer.startRenderLoop();
