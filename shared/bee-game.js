@@ -1,5 +1,20 @@
 const log = require("./log");
 
+const eventTypePriority = {
+  'connect': 1,
+  'game-input': 2,
+  'disconnect': 99
+};
+function compare(va,vb) {
+  if (va === undefined) {
+    if (vb === undefined) { return 0; }
+    return 1;
+  } else if (vb === undefined) {
+    return -1;
+  }
+  return (va > vb) ? 1 : (vb > va ? -1 : 0);
+}
+
 class BeeGame {
   init() {
     const state = {
@@ -24,6 +39,17 @@ class BeeGame {
     };
     log.debug("Update state", { state, events });
     return state;
+  }
+
+  compareEvents(ea, eb) {
+    if(!eventTypePriority[ea.type] || !eventTypePriority[eb.type]) {
+      throw new Error(`${ea.type} is not a known event type`);
+    }
+    return compare(eventTypePriority[ea.type], eventTypePriority[eb.type])
+      || compare(ea.clientid, eb.clientid)
+      || compare(ea.input && ea.input.key, eb.input && eb.input.key)
+      || compare(ea.input && ea.input.direction, eb.input && eb.input.direction)
+      || compare(ea.name, eb.name);
   }
 }
 
