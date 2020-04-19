@@ -1,8 +1,18 @@
-const textures = {
+const team0 = {
   player: new Image(),
-  drone: new Image()
+  boid: new Image()
 }
-textures.player.src = 'images/bee-color-centered.png';
-textures.drone.src = 'letitbee2.svg';
+team0.player.src = 'images/team1_bee.png';
+team0.boid.src = 'images/team1_boid.png';
 
-module.exports = textures;
+const team1 = {
+  player: new Image(),
+  boid: new Image()
+}
+team1.player.src = 'images/team2_bee.png';
+team1.boid.src = 'images/team2_boid.png';
+
+module.exports = {
+  team0,
+  team1
+};
