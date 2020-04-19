@@ -102,7 +102,7 @@ window.addEventListener('load', () => {
 
   selectTeamForm.addEventListener('submit', e => {
     console.log("I've selected team");
-    console.log(e);
+    console.log(document.querySelector('input[name="team"]:checked').value);
     e.preventDefault();
   })
 
