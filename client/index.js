@@ -75,6 +75,10 @@ window.addEventListener('load', () => {
       const playerSize = Math.max(10, 70 * scale);
       const boidSize = Math.max(5, 35 * scale);
 
+      for (const team of gameState.teams) {
+        ctx.drawImage(Textures[`team${team.id}`].hive, team.position.x * scale - playerSize / 2, team.position.y * scale - playerSize / 2, playerSize, playerSize);
+      }
+
       for (const boid of gameState.boids) {
         // here come dat boid
         ctx.drawImage(Textures[`team${boid.teamId}`].boid, boid.position.x * scale - boidSize / 2, boid.position.y * scale - boidSize / 2, boidSize, boidSize);

@@ -28,6 +28,7 @@ class BeeGame {
     const state = {
       frame: 0,
       players: [],
+      teams: teams,
       boids: [
         ...teams.flatMap(team =>
           createBoidSwarm({
