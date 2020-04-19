@@ -3,6 +3,12 @@ const Renderer = require('./renderer');
 const Input = require('./input');
 const Textures = require('./textures');
 
+function drawImage(ctx, image, x, y, scale, rotation){
+  ctx.setTransform(scale, 0, 0, scale, x, y); // sets scale and origin
+  ctx.rotate(rotation);
+  ctx.drawImage(image, -image.width / 2, -image.height / 2);
+}
+
 window.addEventListener('load', () => {
 
   const lobby = new Lobby();
@@ -69,7 +75,15 @@ window.addEventListener('load', () => {
       }
 
       for (const player of gameState.players) {
-        ctx.drawImage(Textures[`team${player.teamId}`].player, player.position.x * scale - playerSize / 2, player.position.y * scale - playerSize / 2, playerSize, playerSize);
+        const angle = Math.atan2(player.velocity.x, -player.velocity.y);
+        const x = player.position.x * scale;
+        const y = player.position.y * scale;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+        ctx.translate(-x, -y);
+        ctx.drawImage(Textures[`team${player.teamId}`].player, x - playerSize / 2, y - playerSize / 2, playerSize, playerSize);
+        ctx.restore();
       }
     });
     renderer.startRenderLoop();
