@@ -1,4 +1,5 @@
 const log = require("./log");
+const { stringify } = require('../shared/deterministic-json')
 
 function toMs(frames) {
   return frames * (1000 / 30);
@@ -90,7 +91,19 @@ class NetworkClient {
     var roundtripFrames = now - msg.oframe;
     var clientFrames = msg.oframe + roundtripFrames * 0.5;
     var framesDifference = clientFrames - msg.nframe;
-    this.simulator.forgetMomentsBefore(msg.stableframe);
+    this.simulator.forgetMomentsBefore(msg.stableFrame);
+
+    // We received a state from the server. We'll check whether the state is equal.
+    if (msg.stableState) {
+      const serverState = msg.stableState;
+      const clientState = this.simulator.getMoment(serverState.frame).state;
+      const serverStateString = stringify(serverState);
+      const clientStateString = stringify(clientState);
+      if (serverStateString !== clientStateString) {
+        log.warn("Out of sync", { serverState, clientState })
+        this.simulator.setState(msg.stableState);
+      }
+    }
 
     if (-framesDifference >= 30) {
       // We're too far behind compared to the server (1 second),

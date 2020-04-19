@@ -1,3 +1,4 @@
+"use strict";
 const log = require("./log");
 
 const eventTypePriority = {
@@ -100,78 +101,30 @@ function updatePlayer(player) {
 
   return {
     ...player,
-    position: floorV(addV(player.position, velocity)),
-    velocity: floorV(velocity),
+    position: roundV(addV(player.position, velocity)),
+    velocity: roundV(velocity),
   }
 }
 
 function updateBoids(boids, { players }) {
   // We interpret players as 'other surrounding' boids as well.
-  const boidsAndPlayers = boids.concat(players);
+  const entities = boids.concat(players);
   const teamIds = [0, 1];
-  const teams = teamIds.map(teamId => ({
-    boids: boidsAndPlayers.filter(boid => boid.teamId === teamId),
-    allies: players.filter(player => player.teamId === teamId),
-  }));
-
-  const { winner, loser } = duel(teams);
-  takeOverNearestBoid(winner, loser);
-
-  return boids.map((boid) => updateBoid(boid, teams[boid.teamId]));
-}
-
-function duel(teams) {
-  if ( teamSpread(teams[0]) > teamSpread(teams[1]) ) {
+  const teams = teamIds.map(teamId => {
+    const teamEntities = entities.filter(boid => boid.teamId === teamId);
+    const teamPlayers = players.filter(player => player.teamId === teamId);
+    const center = teamEntities.length && multiplyV(teamEntities.reduce(addV, zeroV), 1 / teamEntities.length);
+    const spread = teamEntities.length && teamEntities.map(entity => distanceV(center, entity.position)).reduce((total, distance) => total + distance, 0);
     return {
-      winner: teams[1],
-      loser: teams[0]
+      id: teamId,
+      entities: teamEntities,
+      players: teamPlayers,
+      center,
+      spread
     };
-  } else {
-    return {
-      winner: teams[0],
-      loser: teams[1]
-    };
-  }
-}
+  });
 
-function teamSpread(team) {
-  const xCoords = team.boids.map(b => b.position.x);
-  const yCoords = team.boids.map(b => b.position.y);
-  const boundingBox = {
-    width: Math.max(...xCoords) - Math.min(...xCoords),
-    height: Math.max(...yCoords) - Math.min(...yCoords)
-  };
-  boundingBox.surface = boundingBox.width * boundingBox.height;
-  return boundingBox.surface;
-}
-
-function teamCenter(team) {
-  let xCoords, yCoords;
-  if ( team.allies.length > 0 ) {
-    xCoords = team.allies.map(a => a.position.x);
-    yCoords = team.allies.map(a => a.position.y);
-  } else {
-    xCoords = team.boids.map(b => b.position.x);
-    yCoords = team.boids.map(b => b.position.y);
-  }
-
-  return {
-    x: xCoords.reduce((sum, x) => sum + x, 0) / xCoords.length,
-    y: yCoords.reduce((sum, y) => sum + y, 0) / yCoords.length
-  }
-}
-
-function takeOverNearestBoid(winner, loser) {
-  // TODO: don't take over all boids ;)
-  const takeOverDistance = 200;
-  const center = teamCenter(winner);
-  for (const boid of loser.boids) {
-    const distance = distanceV(boid.position, center);
-    if (distance >= takeOverDistance) {
-      continue;
-    }
-    boid.teamId = winner.boids[0].teamId;
-  }
+  return boids.map((boid) => updateBoid(boid, { myTeam: teams[boid.teamId], enemyTeam: teams[(boid.teamId + 1) % 2] }));
 }
 
 function getSeparation(boid, boids) {
@@ -279,11 +232,12 @@ function getPlayerAttraction(boid, players) {
   ].reduce(addV, zeroV);
 }
 
-function updateBoid(boid, { boids, allies }) {
-  const separationV = getSeparation(boid, boids, { desiredSeparation: 20 });
-  const alignmentV = getAlignment(boid, boids, { neighborDistance: 50 });
-  const cohesionV = getCohesion(boid, boids, { neighborDistance: 100 });
-  const playerAttractionV = getPlayerAttraction(boid, allies);
+function updateBoid(boid, { myTeam, enemyTeam }) {
+  const { entities, players } = myTeam;
+  const separationV = getSeparation(boid, entities, { desiredSeparation: 20 });
+  const alignmentV = getAlignment(boid, entities, { neighborDistance: 50 });
+  const cohesionV = getCohesion(boid, entities, { neighborDistance: 100 });
+  const playerAttractionV = getPlayerAttraction(boid, players);
   let acceleration = [
     multiplyV(separationV, 0.000015),
     multiplyV(alignmentV,  0.000001),
@@ -294,19 +248,24 @@ function updateBoid(boid, { boids, allies }) {
   // Drag
   acceleration = addV(acceleration, multiplyV(boid.velocity, -0.05));
 
+  const teamLosing = myTeam.spread < enemyTeam.spread;
+  const boidLosing = teamLosing && enemyTeam.entities.some(entity => distanceV(boid.position, entity.position) < 200);
+  const teamId = boidLosing ? enemyTeam.id : myTeam.id;
+
   return {
     ...boid,
-    position: floorV(addV(boid.position, boid.velocity)),
-    velocity: floorV(addV(boid.velocity, acceleration)),
+    teamId,
+    position: roundV(addV(boid.position, boid.velocity)),
+    velocity: roundV(addV(boid.velocity, acceleration)),
   };
 }
 
 const zeroV = { x: 0, y: 0 };
 
-function floorV(v) {
+function roundV(v) {
   return {
-    x: Math.floor(v.x * 1000) / 1000,
-    y: Math.floor(v.y * 1000) / 1000,
+    x: Math.round(v.x * 1000) / 1000,
+    y: Math.round(v.y * 1000) / 1000,
   }
 }
 
@@ -365,6 +324,9 @@ function limitV(v, limit) {
 }
 
 function handleEvent(state, event) {
+  if (event.type === 'game-input') {
+    console.log({ frame: state.frame, input: event.input })
+  }
   return {
     ...state,
     players: handlePlayerEvent(state.players, event),

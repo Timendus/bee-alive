@@ -186,6 +186,16 @@ class Simulator {
     }
   }
 
+  setState(state) {
+    this.moments = [{
+      state,
+      events: []
+    }];
+    const events = this.getEvents();
+    this.futureEvents = events;
+    this.recalculateStates(state.frame);
+  }
+
   getEvents() {
     var events = [];
     for (var i = this.moments.length - 1; i >= 0; i--) {

@@ -1,4 +1,5 @@
 const log = require('../shared/log')
+const { stringify } = require('../shared/deterministic-json')
 
 class NetworkServer {
   constructor(simulator) {
@@ -20,19 +21,23 @@ class NetworkServer {
     );
   }
   recalculateStableFrame() {
-    this.stableFrame = this.clients
-      .map((client) => client.lastFrame)
-      .reduce(Math.min, Infinity);
-    this.simulator.forgetMomentsBefore(this.stableFrame);
+    const clientConfirmedFrames = this.clients.map((client) => client.lastFrame);
+    const serverConfirmedFrame = this.simulator.getCurrentFrame();
+    const confirmedFrames = clientConfirmedFrames.concat([serverConfirmedFrame]);
+    const oldestConfirmedFrame = Math.min(...confirmedFrames);
+    this.stableFrame = oldestConfirmedFrame;
+    this.simulator.forgetMomentsBefore(oldestConfirmedFrame);
   }
   createClient(messenger, name) {
+    const oldestState = this.simulator.getOldestState();
+
     var client = new Client({
       status: Client.STATUS_ACTIVE,
       id: this.newclientid++,
       name: name,
       server: this,
       messenger: messenger,
-      lastframe: this.simulator.getCurrentFrame(),
+      lastFrame: oldestState.frame,
     });
     this.clients.push(client);
 
@@ -49,7 +54,7 @@ class NetworkServer {
     client.messenger.send({
       type: "initialize",
       clientid: client.id,
-      state: this.simulator.getOldestState(),
+      state: oldestState,
       events: this.simulator.getEvents(),
       currentframe: this.simulator.getCurrentFrame(),
     });
@@ -102,6 +107,7 @@ class Client {
     this.name = name;
     this.server = server;
     this.messenger = messenger;
+    this.lastResetFrame = -1;
     this.lastFrame = lastFrame;
 
     messenger.onmessage = this.handleMessage.bind(this);
@@ -152,13 +158,17 @@ class Client {
   }
 
   handleSyn(msg) {
-    this.lastframe = msg.frame;
+    this.lastFrame = msg.frame;
     this.server.recalculateStableFrame();
+    const stableFrame = this.server.stableFrame;
+    const stableMoment = this.server.simulator.getMoment(stableFrame);
+    const stableState = stableMoment.state;
     this.messenger.send({
       type: "ack",
       oframe: msg.frame,
       nframe: this.server.simulator.getCurrentFrame(),
-      stableframe: this.server.stableframe,
+      stableFrame,
+      stableState,
     });
   }
 
