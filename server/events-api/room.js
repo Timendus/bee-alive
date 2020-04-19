@@ -12,13 +12,17 @@ class Room {
   }
 
   joinSocket(socket, name) {
-    this._client = this._networkServer.createClient(new SocketIOMessenger(socket), name);
+    const client = this._networkServer.createClient(new SocketIOMessenger(socket), name);
+    socket.networkClient = client;
     socket.join(this.roomId);
   }
 
   leaveSocket(socket) {
+    if (!socket.networkClient) {
+      throw new Error('The socket does not have a client');
+    }
     socket.leave(this.roomId);
-    this._networkServer.removeClient(this._client);
+    this._networkServer.removeClient(socket.networkClient);
   }
 }
 
@@ -58,6 +62,14 @@ module.exports = async io => {
       if (!room) { return }
       room.leaveSocket(socket);
     });
+
+    socket.on('disconnect', () => {
+      for (const roomId of Object.keys(socket.rooms)) {
+        const room = rooms[roomId];
+        if (!room) { return }
+        room.leaveSocket(socket);
+      }
+    })
 
     socket.on('roomMessage', message => {
       message = htmlEntities(message);
