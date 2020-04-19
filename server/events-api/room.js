@@ -23,7 +23,9 @@ class Room {
 }
 
 module.exports = async io => {
+
   const rooms = {};
+  const playerNames = {};
 
   io.on('connection', socket => {
 
@@ -58,15 +60,41 @@ module.exports = async io => {
     });
 
     socket.on('roomMessage', message => {
+      message = htmlEntities(message);
       Object.keys(socket.rooms).forEach(room => {
         if ( Object.keys(rooms).includes(room) )
-          io.to(room).emit('roomMessage', message);
+          io.to(room).emit('roomMessage', {
+            client:   socket.id,
+            userName: playerName(socket),
+            message
+          });
       });
     });
 
     socket.on('lobbyMessage', message => {
-      io.emit('lobbyMessage', message);
+      message = htmlEntities(message);
+      io.emit('lobbyMessage', {
+        client:   socket.id,
+        userName: playerName(socket),
+        message
+      });
+    });
+
+    socket.on('setName', name => {
+      name = htmlEntities(name);
+      playerNames[socket.id] = name;
+      console.log(playerNames);
     });
 
   });
+
+  function playerName(socket) {
+    return playerNames[socket.id] ||
+      "Anonymous Player " + socket.id.substr(-3).toUpperCase();
+  }
+
+  function htmlEntities(str) {
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
 }

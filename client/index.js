@@ -16,6 +16,7 @@ window.addEventListener('load', () => {
   const joinForm      = document.getElementById('join');
   const roomsList     = document.getElementById('games');
   const playersList   = document.getElementById('players');
+  const userName      = document.getElementById('user-name');
   const input         = new Input('canvas');
   const gameSize      = 1024;
   const renderer      = new Renderer({ gameSize });
@@ -38,7 +39,12 @@ window.addEventListener('load', () => {
     // Attach event handlers to room
 
     room.addEventListener('chatMessage', msg => {
-      roomMessages.innerHTML += `${msg}\n`;
+      roomMessages.innerHTML += `
+        <div class="chat-message${ msg.me? ' mine' : ''}">
+          <p class="message">${msg.message}</p>
+          <p class="name">${msg.userName}</p>
+        </div>\n
+      `;
       roomMessages.scrollTop = roomMessages.scrollHeight;
     });
 
@@ -79,7 +85,12 @@ window.addEventListener('load', () => {
   });
 
   lobby.addEventListener('chatMessage', msg => {
-    lobbyMessages.innerHTML += `<div class="chat-message"><p class="message">${msg}</p><p class="name">Henk</p></div>\n`;
+    lobbyMessages.innerHTML += `
+      <div class="chat-message${ msg.me? ' mine' : ''}">
+        <p class="message">${msg.message}</p>
+        <p class="name">${msg.userName}</p>
+      </div>\n
+    `;
     lobbyMessages.scrollTop = lobbyMessages.scrollHeight;
   });
 
@@ -104,6 +115,10 @@ window.addEventListener('load', () => {
     room.chatMessage(input.value);
     input.value = '';
     e.preventDefault();
+  });
+
+  userName.addEventListener('keyup', () => {
+    lobby.setName(userName.value);
   });
 
 });

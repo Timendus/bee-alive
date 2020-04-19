@@ -4,7 +4,7 @@
 
   padding: 4em;
 
-  .front-porch-container {
+  .grid {
     display: grid;
     grid-template-columns: 1fr 300px;
     min-height: calc(100vh - 4em);

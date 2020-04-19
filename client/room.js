@@ -103,6 +103,10 @@ class Lobby {
     socket.emit('lobbyMessage', msg);
   }
 
+  setName(name) {
+    socket.emit('setName', name);
+  }
+
   // "Internal" methods
 
   _fireEvent(evnt, ...params) {
@@ -141,6 +145,7 @@ class Lobby {
     });
 
     socket.on('lobbyMessage', msg => {
+      msg.me = msg.client == socket.id;
       this._fireEvent('chatMessage', msg);
     });
   }
