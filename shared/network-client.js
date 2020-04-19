@@ -166,6 +166,7 @@ class NetworkClient {
       type: "game-input",
       frame,
       input,
+      clientid: this.clientid,
     })
     this.messenger.send({
       type: "game-input",

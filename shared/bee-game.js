@@ -186,8 +186,8 @@ function handlePlayerEvent(players, event) {
       return players.filter((player) => player.id !== event.clientid);
     case "game-input":
       return players.map((player) =>
-        event.clientid === player.clientid
-          ? handlePlayerInput(player, input)
+        event.clientid === player.id
+          ? handlePlayerInput(player, event.input)
           : player
       );
     default:
