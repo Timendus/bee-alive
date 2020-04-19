@@ -142,9 +142,11 @@ window.addEventListener('load', () => {
     e.preventDefault();
   });
 
-  userName.value = lobby.getName();
-  userName.addEventListener('keyup', () => {
-    lobby.setName(userName.value);
+  userName.addEventListener('submit', e => {
+    lobby.setName(userName.querySelector('input').value);
+    document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
+    document.getElementById('front-porch').classList.add('active');
+    e.preventDefault();
   });
 
 });

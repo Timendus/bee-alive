@@ -1,0 +1,53 @@
+@import './colours';
+
+#user-name-selection {
+
+  margin-top: 0px;
+  height: 100%;
+
+  .flex {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .center {
+    width: 400px;
+    height: 400px;
+    padding: 2em;
+
+    background-color: $yellow;
+    border: 4px solid $darkYellow;
+    text-align: center;
+
+    h1 {
+      margin: 0 0 1em 0;
+      font-size: 2em;
+    }
+
+    form > button {
+      display: block;
+      margin: 1em auto;
+      font-size: 2em;
+
+      background: linear-gradient(to right, white 50%, $green 50%);
+      background-size: 200% 100%;
+      background-position: right bottom;
+      color: white;
+
+      transition: color .3s ease-out, background .3s ease-out;
+
+      &:hover {
+        background-color: white;
+        background-position: left bottom;
+        color: black;
+      }
+    }
+
+    @media screen and (max-width: 768px) {
+      width: 100%;
+    }
+  }
+
+}
