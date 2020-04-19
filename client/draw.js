@@ -1,17 +1,15 @@
 const Textures = require('./textures');
 
 module.exports = frame => {
-  const gameState = frame.simulator.getCurrentState();
-
   drawBackground(frame);
 
-  if ( gameState.finished )
-    return drawFinishedState(frame, gameState.winning);
+  if ( frame.state.finished )
+    return drawFinishedState(frame, frame.state.winning);
 
-  drawRemainingTime(frame, gameState.remaining);
-  drawHives(frame, gameState.teams);
-  drawBoids(frame, gameState.boids);
-  drawPlayers(frame, gameState.players);
+  drawRemainingTime(frame, frame.state.remaining);
+  drawHives(frame, frame.state.teams);
+  drawBoids(frame, frame.state.boids);
+  drawPlayers(frame, frame.state.players);
 }
 
 function drawBackground(frame) {

@@ -27,7 +27,7 @@ class BeeGame {
   init() {
     const state = {
       frame: 0,
-      remaining: 30 * 30,
+      remaining: 30 * 30,  // A game lasts 30 seconds (times 30 frames)
       finished: false,
       winning: [],
       players: [],
@@ -53,7 +53,7 @@ class BeeGame {
       frame: state.frame + 1,
       remaining: state.remaining - 1,
       finished: state.remaining < 1,
-      winning: winningTeam(state.teams, state.boids),
+      winning: winningTeams(state.teams, state.boids),
       players: state.players.map(player => updatePlayer(player)),
       boids: updateBoids(state.boids, { players: state.players }),
     };
@@ -112,7 +112,7 @@ function updatePlayer(player) {
   }
 }
 
-function winningTeam(teams, boids) {
+function winningTeams(teams, boids) {
   let max = 0;
   let winners = [];
   teams.forEach(team => {

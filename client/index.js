@@ -69,7 +69,7 @@ window.addEventListener('load', () => {
     });
 
     renderer.setRenderCallback((progress, ctx, scale) =>
-      draw({progress, ctx, scale, simulator: room.simulator}));
+      draw({progress, ctx, scale, state: room.simulator.getCurrentState()}));
 
     renderer.startRenderLoop();
     input.attachListeners(room);
