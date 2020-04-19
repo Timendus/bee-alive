@@ -8,18 +8,19 @@ window.addEventListener('load', () => {
   const lobby = new Lobby();
   let room = null;
 
-  const roomMessages  = document.getElementById('roomMessages');
-  const roomChat      = document.getElementById('roomChat');
-  const lobbyMessages = document.getElementById('lobbyMessages');
-  const lobbyChat     = document.getElementById('lobbyChat');
-  const createButton  = document.getElementById('create');
-  const joinForm      = document.getElementById('join');
-  const roomsList     = document.getElementById('games');
-  const playersList   = document.getElementById('players');
-  const userName      = document.getElementById('user-name');
-  const input         = new Input('canvas');
-  const gameSize      = 1024;
-  const renderer      = new Renderer({ gameSize });
+  const roomMessages   = document.getElementById('roomMessages');
+  const roomChat       = document.getElementById('roomChat');
+  const lobbyMessages  = document.getElementById('lobbyMessages');
+  const lobbyChat      = document.getElementById('lobbyChat');
+  const createButton   = document.getElementById('create');
+  const joinForm       = document.getElementById('join');
+  const selectTeamForm = document.getElementById('selectTeam');
+  const roomsList      = document.getElementById('games');
+  const playersList    = document.getElementById('players');
+  const userName       = document.getElementById('user-name');
+  const input          = new Input('canvas');
+  const gameSize       = 1024;
+  const renderer       = new Renderer({ gameSize });
 
   // Room events
 
@@ -101,6 +102,12 @@ window.addEventListener('load', () => {
     lobby.join(joinForm.querySelector('input').value);
     e.preventDefault();
   });
+
+  selectTeamForm.addEventListener('submit', e => {
+    console.log("I've selected team");
+    console.log(e);
+    e.preventDefault();
+  })
 
   lobbyChat.addEventListener('submit', e => {
     const input = lobbyChat.querySelector('input');

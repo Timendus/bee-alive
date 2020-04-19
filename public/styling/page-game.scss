@@ -10,6 +10,36 @@
       border-right: 4px solid #ffe72d;
     }
 
+    .teamSelector {
+      padding: 1rem;
+      #selectTeam {
+        display: flex;
+        align-items: center;
+        input[type="radio"]{
+          display:none;
+          & ~ span {
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+          }
+          & ~ span.cyan {
+            background-color: #adeefe;
+          }
+          & ~ span.magenta {
+            background-color:#feadfd;
+          }
+          &:checked ~ span {
+            &.cyan {
+              background-color: #61dffe;
+            }
+            &.magenta {
+              background-color:#fe61fc;
+            }
+          }
+        }
+      }
+    }
+
     #canvas-wrapper {
       height: 100%;
       display: flex;
