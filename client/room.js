@@ -15,9 +15,11 @@ class Room {
       messenger: this.messenger,
       simulator: this.simulator,
     });
+    this._players = [];
     this._events = {
       'leave':       [],
-      'chatMessage': []
+      'chatMessage': [],
+      'players':     []
     };
 
     this._attachServerEvents();
@@ -50,6 +52,11 @@ class Room {
       msg.me = msg.client == socket.id;
       this._fireEvent('chatMessage', msg);
     });
+
+    socket.on('players', players => {
+      this._players = players;
+      this._fireEvent('players', players);
+    });
   }
 
 }
@@ -71,7 +78,7 @@ class Lobby {
 
     this._attachBrowserEvents();
     this._attachServerEvents();
-    socket.emit('list'); // Request room list on load
+    socket.emit('init'); // Request lists on load
     this._navigate();    // Trigger on page load
   }
 
@@ -139,11 +146,6 @@ class Lobby {
       this.join(roomId);
     });
 
-    socket.on('players', players => {
-      this._players = players;
-      this._fireEvent('players', players);
-    });
-
     socket.on('list', list => {
       this._rooms = list;
       this._fireEvent('roomList', list);
@@ -156,6 +158,11 @@ class Lobby {
     socket.on('lobbyMessage', msg => {
       msg.me = msg.client == socket.id;
       this._fireEvent('chatMessage', msg);
+    });
+
+    socket.on('lobbyPlayers', players => {
+      this._players = players;
+      this._fireEvent('players', players);
     });
   }
 

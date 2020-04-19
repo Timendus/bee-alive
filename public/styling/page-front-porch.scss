@@ -6,7 +6,7 @@
 
   .grid {
     display: grid;
-    grid-template-columns: 1fr 300px;
+    grid-template-columns: 1fr 400px;
     min-height: calc(100vh - 4em);
 
     @media screen and (max-width: 768px) {

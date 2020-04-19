@@ -8,18 +8,19 @@ window.addEventListener('load', () => {
   const lobby = new Lobby();
   let room = null;
 
-  const roomMessages  = document.getElementById('roomMessages');
-  const roomChat      = document.getElementById('roomChat');
-  const lobbyMessages = document.getElementById('lobbyMessages');
-  const lobbyChat     = document.getElementById('lobbyChat');
-  const createButton  = document.getElementById('create');
-  const joinForm      = document.getElementById('join');
-  const roomsList     = document.getElementById('games');
-  const playersList   = document.getElementById('players');
-  const userName      = document.getElementById('user-name');
-  const input         = new Input('canvas');
-  const gameSize      = 1024;
-  const renderer      = new Renderer({ gameSize });
+  const roomMessages     = document.getElementById('roomMessages');
+  const roomChat         = document.getElementById('roomChat');
+  const lobbyMessages    = document.getElementById('lobbyMessages');
+  const lobbyChat        = document.getElementById('lobbyChat');
+  const createButton     = document.getElementById('create');
+  const joinForm         = document.getElementById('join');
+  const roomsList        = document.getElementById('games');
+  const playersList      = document.getElementById('players');
+  const lobbyPlayersList = document.getElementById('lobbyPlayers');
+  const userName         = document.getElementById('user-name');
+  const input            = new Input('canvas');
+  const gameSize         = 1024;
+  const renderer         = new Renderer({ gameSize });
 
   // Room events
 
@@ -37,6 +38,11 @@ window.addEventListener('load', () => {
     roomMessages.innerHTML = '';
 
     // Attach event handlers to room
+
+    room.addEventListener('players', players => {
+      playersList.innerHTML = players.map(p => `<li>${p.userName}</li>`)
+                                     .join('');
+    });
 
     room.addEventListener('chatMessage', msg => {
       roomMessages.innerHTML += `
@@ -78,6 +84,11 @@ window.addEventListener('load', () => {
 
   lobby.addEventListener('roomList', list => {
     roomsList.innerHTML = list.map(room => `<li><a class="room-link" href='#${room}'>${room}</a></li>`).join('');
+  });
+
+  lobby.addEventListener('players', players => {
+    lobbyPlayersList.innerHTML = players.map(p => `<li>${p.userName}${p.inRoom ? ' <span>(in a game)</span>' : ''}</li>`)
+                                        .join('');
   });
 
   lobby.addEventListener('chatMessage', msg => {
