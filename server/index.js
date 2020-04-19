@@ -6,9 +6,10 @@ const session    = require('express-session');
 const bodyParser = require('body-parser');
 const eventAPI   = require('./events-api');
 const config     = require('../package.json').configuration;
+const port       = process.env.PORT || config.server.port;
 
 if ( config.server.verbose )
-  console.log(`Starting server at port ${config.server.port}`);
+  console.log(`Starting server at port ${port}`);
 
 // Request logging middleware
 app.use((req, res, next) => {
@@ -25,5 +26,5 @@ eventAPI(io);                      // Mount events API using socket.io
   // but I don't think we'll need them.
 
 // Start server
-server.listen(config.server.port, () =>
-  console.log(`Server is listening on port ${config.server.port}`));
+server.listen(port, () =>
+  console.log(`Server is listening on port ${port}`));
