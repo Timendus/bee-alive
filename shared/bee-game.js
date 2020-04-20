@@ -114,7 +114,10 @@ function updatePlayer(player) {
 }
 
 function keepInCanvas(position) {
-  return {x: Math.max(10, Math.min(1014, position.x)), y: Math.max(10, Math.min(1014, position.y))};
+  return {
+    x: Math.max(10, Math.min(1014, position.x)),
+    y: Math.max(10, Math.min(1014, position.y))
+  };
 }
 
 function winningTeams(teams, boids) {
