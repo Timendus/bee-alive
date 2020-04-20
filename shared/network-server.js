@@ -38,7 +38,7 @@ class NetworkServer {
       name: name,
       server: this,
       messenger: messenger,
-      lastFrame: oldestState.frame,
+      lastFrame: this.simulator.getCurrentFrame(),
     });
     this.clients.push(client);
 
