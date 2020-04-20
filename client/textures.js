@@ -8,14 +8,14 @@ module.exports = {
       hive:   image('images/team1_hive.png')
     },
     1: {
-      player: image('images/team1_bee.png'),
-      boid:   image('images/team1_boid.png'),
-      hive:   image('images/team1_hive.png')
+      player: image('images/team2_bee.png'),
+      boid:   image('images/team2_boid.png'),
+      hive:   image('images/team2_hive.png')
     },
 
     // These are the neutral boids
     2: {
-      boid:   image('images/team1_boid.png')
+      boid:   image('images/neutral_boid.png')
     }
   },
 
