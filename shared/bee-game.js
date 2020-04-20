@@ -67,7 +67,8 @@ class BeeGame {
       finished: finished,
       winning: winningTeams(state.teams, state.boids),
       players: finished ? state.players : state.players.map(player => updatePlayer(player)),
-      boids: finished ? state.boids : updateBoids(state.boids, { players: state.players }).concat(newBoids(state.frame, state.randomBoids)),
+      boids: finished ? state.boids : updateBoids(state.boids, { players: state.players })
+                                      .concat(newBoids(state.frame, state.randomBoids)),
     };
     log.debug("Update state", { state, events });
     return state;
@@ -390,6 +391,8 @@ function updateBoid(boid, { boids, allies }) {
 
 const zeroV = { x: 0, y: 0 };
 
+// Note: only for use in init function!
+// Otherwise we're not deterministic
 function randomV() {
   return {
     x: random(-3,3),
