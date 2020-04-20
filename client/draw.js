@@ -13,7 +13,7 @@ module.exports = frame => {
 }
 
 function drawBackground(frame) {
-  frame.ctx.drawImage(Textures.shared.background, 0, 0, 1024 * frame.scale, 1024 * frame.scale);
+  frame.ctx.drawImage(Textures.background, 0, 0, 1024 * frame.scale, 1024 * frame.scale);
 }
 
 function drawFinishedState(frame, winning) {
@@ -39,7 +39,8 @@ function drawRemainingTime(frame, remaining) {
 function drawHives(frame, teams) {
   const hiveSize = Math.max(10, 100 * frame.scale);
   for (const team of teams) {
-    frame.ctx.drawImage(Textures[`team${team.id}`].hive, team.position.x * frame.scale - hiveSize / 2, team.position.y * frame.scale - hiveSize / 2, hiveSize, hiveSize);
+    if ( !Textures.teams[team.id].hive ) continue;
+    frame.ctx.drawImage(Textures.teams[team.id].hive, team.position.x * frame.scale - hiveSize / 2, team.position.y * frame.scale - hiveSize / 2, hiveSize, hiveSize);
   }
 }
 
@@ -47,7 +48,7 @@ function drawBoids(frame, boids) {
   const boidSize = Math.max(5, 35 * frame.scale);
   for (const boid of boids) {
     // here come dat boid
-    frame.ctx.drawImage(Textures[`team${boid.teamId}`].boid, boid.position.x * frame.scale - boidSize / 2, boid.position.y * frame.scale - boidSize / 2, boidSize, boidSize);
+    frame.ctx.drawImage(Textures.teams[boid.teamId].boid, boid.position.x * frame.scale - boidSize / 2, boid.position.y * frame.scale - boidSize / 2, boidSize, boidSize);
   }
 }
 
@@ -61,7 +62,7 @@ function drawPlayers(frame, players) {
     frame.ctx.translate(x, y);
     frame.ctx.rotate(angle);
     frame.ctx.translate(-x, -y);
-    frame.ctx.drawImage(Textures[`team${player.teamId}`].player, x - playerSize / 2, y - playerSize / 2, playerSize, playerSize);
+    frame.ctx.drawImage(Textures.teams[player.teamId].player, x - playerSize / 2, y - playerSize / 2, playerSize, playerSize);
     frame.ctx.restore();
   }
 }

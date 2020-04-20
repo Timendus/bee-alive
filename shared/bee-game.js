@@ -18,9 +18,15 @@ function compare(va,vb) {
 const teams = [{
   id: 0,
   position: createV(64, 512),
+  boidCount: 10
 }, {
   id: 1,
-  position: createV(1024 - 64, 512)
+  position: createV(1024 - 64, 512),
+  boidCount: 10
+}, {
+  id: 2,
+  position: false,
+  boidCount: 20
 }];
 
 class BeeGame {
@@ -36,7 +42,7 @@ class BeeGame {
         ...teams.flatMap(team =>
           createBoidSwarm({
             center: team.position,
-            count: 10,
+            count: team.boidCount,
             teamId: team.id,
           })
         ),
@@ -80,20 +86,43 @@ const maxForce = 0.01;
 function createBoidSwarm({ center, count, teamId }) {
   const boids = [];
   for (let index = 0; index < count; index++) {
-    const angle = (Math.PI * 2) * index / count;
-    const direction = createV(
-      Math.cos(angle),
-      Math.sin(angle)
-    );
-    const position = addV(center, multiplyV(direction, 50));
-    const velocity = multiplyV(perpendicularClockwiseV(direction), 1);
+    let movement;
+    if ( center ) {
+      movement = boidsInACircle(index, count, center);
+    } else {
+      movement = boidsAllOverThePlace();
+    }
+
     boids.push({
-      position,
-      velocity,
+      position: movement.position,
+      velocity: movement.velocity,
       teamId,
-    })
+    });
   }
   return boids;
+}
+
+function boidsInACircle(index, count, center) {
+  const angle = (Math.PI * 2) * index / count;
+  const direction = createV(
+    Math.cos(angle),
+    Math.sin(angle)
+  );
+  return {
+    position: addV(center, multiplyV(direction, 50)),
+    velocity: multiplyV(perpendicularClockwiseV(direction), 1)
+  };
+}
+
+function boidsAllOverThePlace() {
+  return {
+    position: createV(random(10, 1014), random(10, 1014)),
+    velocity: zeroV,
+  }
+}
+
+function random(min, max) {
+  return min + Math.floor(Math.random() * Math.floor(max + 1 - min));
 }
 
 function updatePlayer(player) {
@@ -139,16 +168,18 @@ function winningTeams(teams, boids) {
 function updateBoids(boids, { players }) {
   // We interpret players as 'other surrounding' boids as well.
   const boidsAndPlayers = boids.concat(players);
-  const teamIds = [0, 1];
-  const teams = teamIds.map(teamId => ({
+  const teamIds = teams.map(team => team.id);
+  const teamsObj = teamIds.map(teamId => ({
     boids: boidsAndPlayers.filter(boid => boid.teamId === teamId),
     allies: players.filter(player => player.teamId === teamId),
   }));
 
-  const { winner, loser } = duel(teams);
+  const { winner, loser } = duel(teamsObj);
   takeOverNearestBoid(winner, loser);
+  takeOverNearestBoid(teamsObj[0], teamsObj[2]);
+  takeOverNearestBoid(teamsObj[1], teamsObj[2]);
 
-  return boids.map((boid) => updateBoid(boid, teams[boid.teamId]));
+  return boids.map((boid) => updateBoid(boid, teamsObj[boid.teamId]));
 }
 
 function duel(teams) {
@@ -195,6 +226,7 @@ function teamCenter(team) {
 function takeOverNearestBoid(winner, loser) {
   // TODO: don't take over all boids ;)
   const takeOverDistance = 200;
+  if (winner.boids.length == 0) return;
   const center = teamCenter(winner);
   for (const boid of loser.boids) {
     const distance = distanceV(boid.position, center);
@@ -403,7 +435,7 @@ function handleEvent(state, event) {
 }
 
 function createPlayer({ id, teamId = null }) {
-  teamId = teamId || (id % teams.length)
+  teamId = teamId || (id % 2)
   const team = teams[teamId];
   const position = team.position;
   const velocity = zeroV;
