@@ -170,17 +170,22 @@ function updateBoids(boids, { players }) {
   // We interpret players as 'other surrounding' boids as well.
   const boidsAndPlayers = boids.concat(players);
   const teamIds = teams.map(team => team.id);
-  const teamsObj = teamIds.map(teamId => ({
-    boids: boidsAndPlayers.filter(boid => boid.teamId === teamId),
-    allies: players.filter(player => player.teamId === teamId),
-  }));
+  const teamsObj = teamIds.map(teamId => {
+    const teamBoids = boidsAndPlayers.filter(boid => boid.teamId === teamId);
+    const teamPlayers = players.filter(player => player.teamId === teamId);
+    return {
+      boids: teamBoids,
+      allies: teamPlayers,
+      spread: teamSpread(teamBoids),
+    };
+  });
 
   const { winner, loser } = duel(teamsObj);
   takeOverNearestBoid(winner, loser);
   takeOverNearestBoid(teamsObj[0], teamsObj[2]);
   takeOverNearestBoid(teamsObj[1], teamsObj[2]);
 
-  return boids.map((boid) => updateBoid(boid, teamsObj[boid.teamId]));
+  return boids.map((boid) => updateBoid(boid, { myTeam: teamsObj[boid.teamId], enemyTeam: teamsObj[(boid.teamId + 1) % 2], neutralTeam: teamsObj[2] }));
 }
 
 function duel(teams) {
@@ -197,9 +202,9 @@ function duel(teams) {
   }
 }
 
-function teamSpread(team) {
-  const xCoords = team.boids.map(b => b.position.x);
-  const yCoords = team.boids.map(b => b.position.y);
+function teamSpread(boids) {
+  const xCoords = boids.map(b => b.position.x);
+  const yCoords = boids.map(b => b.position.y);
   const boundingBox = {
     width: Math.max(...xCoords) - Math.min(...xCoords),
     height: Math.max(...yCoords) - Math.min(...yCoords)
