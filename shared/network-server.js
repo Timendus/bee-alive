@@ -162,13 +162,20 @@ class Client {
     this.server.recalculateStableFrame();
     const stableFrame = this.server.stableFrame;
     const stableMoment = this.server.simulator.getMoment(stableFrame);
-    const stableStateHash = hash(stableMoment.state);
+    const stableState = stableMoment.state;
+
+    // NOTE: The hashes between server and client are different, while the
+    // serialized+deserialized states are equal. It's still unknown why this is.
+    // For now we will use stableState comparison and ignore hashes.
+
+    // const stableStateHash = hash(stableMoment.state);
     this.messenger.send({
       type: "ack",
       oframe: msg.frame,
       nframe: this.server.simulator.getCurrentFrame(),
       stableFrame,
-      stableStateHash,
+      stableState,
+      // stableStateHash,
     });
   }
 

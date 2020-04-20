@@ -94,13 +94,22 @@ class NetworkClient {
     var framesDifference = clientFrames - msg.nframe;
     this.simulator.forgetMomentsBefore(msg.stableFrame);
 
-    // We received a state from the server. We'll check whether the state is equal.
+    // We received a state hash from the server. We'll check whether the state is equal.
     if (msg.stableStateHash) {
       const serverStateHash = msg.stableStateHash;
-      const clientState = this.simulator.getMoment(serverState.frame).state;
+      const clientState = this.simulator.getMoment(msg.stableFrame).state;
       const clientStateHash = hash(clientState);
       if (serverStateHash !== clientStateHash) {
-        log.warn("Out of sync")
+        log.warn("Out of sync", { serverStateHash, clientStateHash })
+      }
+    }
+
+    // We received a state from the server. We'll check whether the state is equal.
+    if (msg.stableState) {
+      const serverState = msg.stableState;
+      const clientState = this.simulator.getMoment(msg.stableFrame).state;
+      if (stringify(serverState) !== stringify(clientState)) {
+        log.warn("Out of sync", { clientState, serverState })
       }
     }
 
