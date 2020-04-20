@@ -30,6 +30,13 @@ class Room {
     this.messenger.close();
     socket.emit('leave', this.roomId);
     this._fireEvent('leave', this);
+
+    // Clean up event handlers
+    this._events = {
+      'leave':       [],
+      'chatMessage': [],
+      'players':     []
+    };
   }
 
   chatMessage(msg) {
