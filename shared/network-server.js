@@ -108,7 +108,6 @@ class Client {
     this.name = name;
     this.server = server;
     this.messenger = messenger;
-    this.lastResetFrame = -1;
     this.lastFrame = lastFrame;
 
     messenger.onmessage = this.handleMessage.bind(this);
