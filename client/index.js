@@ -67,6 +67,10 @@ window.addEventListener('load', () => {
       document.getElementById('front-porch').classList.add('active');
       renderer.stopRenderLoop();
       input.removeListeners();
+
+      room.removeEventListener('players');
+      room.removeEventListener('chatMessage');
+      room.removeEventListener('leave');
     });
 
     renderer.setRenderCallback((progress, ctx, scale) =>
