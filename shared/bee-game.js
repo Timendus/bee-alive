@@ -27,6 +27,9 @@ class BeeGame {
   init() {
     const state = {
       frame: 0,
+      remaining: 30 * 30,  // A game lasts 30 seconds (times 30 frames)
+      finished: false,
+      winning: [],
       players: [],
       teams: teams,
       boids: [
@@ -45,11 +48,15 @@ class BeeGame {
 
   update(state, events) {
     state = events.reduce(handleEvent, state)
+    const finished = state.remaining < 1;
     state = {
       ...state,
       frame: state.frame + 1,
-      players: state.players.map(player => updatePlayer(player)),
-      boids: updateBoids(state.boids, { players: state.players }),
+      remaining: state.remaining - 1,
+      finished: finished,
+      winning: winningTeams(state.teams, state.boids),
+      players: finished ? state.players : state.players.map(player => updatePlayer(player)),
+      boids: finished ? state.boids : updateBoids(state.boids, { players: state.players }),
     };
     log.debug("Update state", { state, events });
     return state;
@@ -104,6 +111,22 @@ function updatePlayer(player) {
     position: floorV(addV(player.position, velocity)),
     velocity: floorV(velocity),
   }
+}
+
+function winningTeams(teams, boids) {
+  let max = 0;
+  let winners = [];
+  teams.forEach(team => {
+    const numBoids = boids.filter(boid => boid.teamId == team.id).length;
+    if ( numBoids == max ) {
+      winners.push(team);
+    }
+    if ( numBoids > max ) {
+      max = numBoids;
+      winners = [team];
+    }
+  });
+  return winners;
 }
 
 function updateBoids(boids, { players }) {

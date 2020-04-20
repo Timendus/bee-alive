@@ -1,7 +1,7 @@
 const { Lobby } = require('./room');
 const Renderer = require('./renderer');
 const Input = require('./input');
-const Textures = require('./textures');
+const draw = require('./draw');
 
 function drawImage(ctx, image, x, y, scale, rotation){
   ctx.setTransform(scale, 0, 0, scale, x, y); // sets scale and origin
@@ -69,34 +69,9 @@ window.addEventListener('load', () => {
       input.removeListeners();
     });
 
-    // TODO: move this?
-    renderer.setRenderCallback((progress, ctx, scale) => {
-      const simulator = room.simulator;
-      const gameState = simulator.getCurrentState();
-      const playerSize = Math.max(10, 70 * scale);
-      const boidSize = Math.max(5, 35 * scale);
+    renderer.setRenderCallback((progress, ctx, scale) =>
+      draw({progress, ctx, scale, state: room.simulator.getCurrentState()}));
 
-      for (const team of gameState.teams) {
-        ctx.drawImage(Textures[`team${team.id}`].hive, team.position.x * scale - playerSize / 2, team.position.y * scale - playerSize / 2, playerSize, playerSize);
-      }
-
-      for (const boid of gameState.boids) {
-        // here come dat boid
-        ctx.drawImage(Textures[`team${boid.teamId}`].boid, boid.position.x * scale - boidSize / 2, boid.position.y * scale - boidSize / 2, boidSize, boidSize);
-      }
-
-      for (const player of gameState.players) {
-        const angle = Math.atan2(player.velocity.x, -player.velocity.y);
-        const x = player.position.x * scale;
-        const y = player.position.y * scale;
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(angle);
-        ctx.translate(-x, -y);
-        ctx.drawImage(Textures[`team${player.teamId}`].player, x - playerSize / 2, y - playerSize / 2, playerSize, playerSize);
-        ctx.restore();
-      }
-    });
     renderer.startRenderLoop();
     input.attachListeners(room);
   });

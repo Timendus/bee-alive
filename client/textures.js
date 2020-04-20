@@ -5,7 +5,7 @@ const team0 = {
 }
 team0.player.src = 'images/team1_bee.png';
 team0.boid.src = 'images/team1_boid.png';
-team0.hive.src = 'images/beehive-blue-cross.png';
+team0.hive.src = 'images/team1_hive.png';
 
 const team1 = {
   player: new Image(),
@@ -14,9 +14,15 @@ const team1 = {
 }
 team1.player.src = 'images/team2_bee.png';
 team1.boid.src = 'images/team2_boid.png';
-team1.hive.src = 'images/beehive-pink-cross.png';
+team1.hive.src = 'images/team2_hive.png';
+
+const shared = {
+  background: new Image()
+};
+shared.background.src = 'images/background.png';
 
 module.exports = {
   team0,
-  team1
+  team1,
+  shared
 };
