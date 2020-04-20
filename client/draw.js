@@ -41,10 +41,16 @@ function drawFinishedState(frame, winning, boids) {
 function drawInstruction(frame) {
   frame.ctx.textAlign = 'center';
   frame.ctx.font = '48px Indie Flower';
-  frame.ctx.fillText("Press R when you're ready!", 512 * frame.scale, 430 * frame.scale);
+  frame.ctx.fillText("Press R when you're ready!", 512 * frame.scale, 380 * frame.scale);
   frame.ctx.font = '30px Indie Flower';
-  frame.ctx.fillText("Use the WSAD keys to move around", 512 * frame.scale, 490 * frame.scale);
-  frame.ctx.fillText("and claim all the worker bees!", 512 * frame.scale, 540 * frame.scale);
+  frame.ctx.fillText("Use the WSAD keys to move around", 512 * frame.scale, 460 * frame.scale);
+  frame.ctx.fillText("and claim all the worker bees!", 512 * frame.scale, 520 * frame.scale);
+
+  let ycoord = 600;
+  frame.state.players.forEach(player => {
+    frame.ctx.fillText(`Player ${player.id + 1}: ${player.ready ? 'Ready!' : 'Not ready'}`, 512 * frame.scale, ycoord * frame.scale);
+    ycoord += 50;
+  });
 }
 
 function drawRemainingTime(frame, remaining) {
