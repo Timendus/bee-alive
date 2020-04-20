@@ -20,6 +20,7 @@ class SocketIOMessenger {
   }
 
   close() {
+    if ( this.onclose ) this.onclose();
     this.socket.off('message', this._messageHandler);
     this.socket.off('close', this._closeHandler);
   }
