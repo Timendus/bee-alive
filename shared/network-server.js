@@ -27,7 +27,11 @@ class NetworkServer {
     const confirmedFrames = clientConfirmedFrames.concat([serverConfirmedFrame]);
     const oldestConfirmedFrame = Math.min(...confirmedFrames);
     this.stableFrame = oldestConfirmedFrame;
-    this.simulator.forgetMomentsBefore(oldestConfirmedFrame);
+    // NOTE: This is a mega hack. Without this we are keeping _all_ game states
+    // of a game so that we can workaround the crash that says that the requested
+    // frame is too old. No frame will be too old, because all moments will be
+    // remembered.
+    // this.simulator.forgetMomentsBefore(oldestConfirmedFrame);
   }
   createClient(messenger, name) {
     const oldestState = this.simulator.getOldestState();
