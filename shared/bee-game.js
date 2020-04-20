@@ -18,22 +18,24 @@ function compare(va,vb) {
 const teams = [{
   id: 0,
   position: createV(64, 512),
-  boidCount: 10
+  boidCount: 4
 }, {
   id: 1,
   position: createV(1024 - 64, 512),
-  boidCount: 10
+  boidCount: 4
 }, {
   id: 2,
   position: false,
-  boidCount: 20
+  boidCount: 10
 }];
+
+const gameDuration = 30; // seconds
 
 class BeeGame {
   init() {
     const state = {
       frame: 0,
-      remaining: 30 * 30,  // A game lasts 30 seconds (times 30 frames)
+      remaining: gameDuration * 30,
       finished: false,
       winning: [],
       players: [],
@@ -47,6 +49,9 @@ class BeeGame {
           })
         ),
       ],
+      randomBoids: [
+        ...randomBoids(10, gameDuration * 30)
+      ]
     };
     log.debug("Init state", { state });
     return state;
@@ -62,7 +67,8 @@ class BeeGame {
       finished: finished,
       winning: winningTeams(state.teams, state.boids),
       players: finished ? state.players : state.players.map(player => updatePlayer(player)),
-      boids: finished ? state.boids : updateBoids(state.boids, { players: state.players }),
+      boids: finished ? state.boids : updateBoids(state.boids, { players: state.players })
+                                      .concat(newBoids(state.frame, state.randomBoids)),
     };
     log.debug("Update state", { state, events });
     return state;
@@ -117,12 +123,31 @@ function boidsInACircle(index, count, center) {
 function boidsAllOverThePlace() {
   return {
     position: createV(random(10, 1014), random(10, 1014)),
-    velocity: zeroV,
+    velocity: randomV(),
   }
 }
 
+// Note: only for use in init function!
+// Otherwise we're not deterministic
 function random(min, max) {
   return min + Math.floor(Math.random() * Math.floor(max + 1 - min));
+}
+
+function newBoids(frame, randomBoids) {
+  return randomBoids.filter(b => b.frame == frame);
+}
+
+function randomBoids(numberOfBoids, frames) {
+  const boids = [];
+  for ( let i = 0; i < numberOfBoids; i++ ) {
+    boids.push({
+      frame: random(0, frames),
+      position: teams[random(0,1)].position,
+      velocity: randomV(),
+      teamId: teams[2].id
+    });
+  }
+  return boids;
 }
 
 function updatePlayer(player) {
@@ -365,6 +390,15 @@ function updateBoid(boid, { boids, allies }) {
 }
 
 const zeroV = { x: 0, y: 0 };
+
+// Note: only for use in init function!
+// Otherwise we're not deterministic
+function randomV() {
+  return {
+    x: random(-3,3),
+    y: random(-3,3)
+  }
+}
 
 function floorV(v) {
   return {
