@@ -37,7 +37,7 @@ function drawRemainingTime(frame, remaining) {
 }
 
 function drawHives(frame, teams) {
-  const hiveSize = Math.max(10, 70 * frame.scale);
+  const hiveSize = Math.max(10, 100 * frame.scale);
   for (const team of teams) {
     frame.ctx.drawImage(Textures[`team${team.id}`].hive, team.position.x * frame.scale - hiveSize / 2, team.position.y * frame.scale - hiveSize / 2, hiveSize, hiveSize);
   }
