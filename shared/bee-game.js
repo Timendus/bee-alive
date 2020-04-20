@@ -1,3 +1,4 @@
+"use strict";
 const log = require("./log");
 
 const eventTypePriority = {
@@ -199,12 +200,24 @@ function updateBoids(boids, { players }) {
     allies: players.filter(player => player.teamId === teamId),
   }));
 
+  let newBoids = boids.map((boid) => updateBoid(boid, teamsObj[boid.teamId]));
+
+  // ! Mutating function.
+  setTeamsOfBoids(newBoids, players);
+
+  return newBoids;
+}
+
+function setTeamsOfBoids(boids, players) {
+  const teamIds = teams.map(team => team.id);
+  const teamsObj = teamIds.map(teamId => ({
+    boids: boids.filter(boid => boid.teamId === teamId),
+    allies: players.filter(player => player.teamId === teamId),
+  }));
   const { winner, loser } = duel(teamsObj);
   takeOverNearestBoid(winner, loser);
   takeOverNearestBoid(teamsObj[0], teamsObj[2]);
   takeOverNearestBoid(teamsObj[1], teamsObj[2]);
-
-  return boids.map((boid) => updateBoid(boid, teamsObj[boid.teamId]));
 }
 
 function duel(teams) {

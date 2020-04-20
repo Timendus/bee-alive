@@ -1,4 +1,6 @@
 const log = require('../shared/log')
+const { stringify } = require('../shared/deterministic-json')
+const hash = require('object-hash');
 
 class NetworkServer {
   constructor(simulator) {
@@ -20,19 +22,23 @@ class NetworkServer {
     );
   }
   recalculateStableFrame() {
-    this.stableFrame = this.clients
-      .map((client) => client.lastFrame)
-      .reduce(Math.min, Infinity);
-    this.simulator.forgetMomentsBefore(this.stableFrame);
+    const clientConfirmedFrames = this.clients.map((client) => client.lastFrame);
+    const serverConfirmedFrame = this.simulator.getCurrentFrame();
+    const confirmedFrames = clientConfirmedFrames.concat([serverConfirmedFrame]);
+    const oldestConfirmedFrame = Math.min(...confirmedFrames);
+    this.stableFrame = oldestConfirmedFrame;
+    this.simulator.forgetMomentsBefore(oldestConfirmedFrame);
   }
   createClient(messenger, name) {
+    const oldestState = this.simulator.getOldestState();
+
     var client = new Client({
       status: Client.STATUS_ACTIVE,
       id: this.newclientid++,
       name: name,
       server: this,
       messenger: messenger,
-      lastframe: this.simulator.getCurrentFrame(),
+      lastFrame: oldestState.frame,
     });
     this.clients.push(client);
 
@@ -49,7 +55,7 @@ class NetworkServer {
     client.messenger.send({
       type: "initialize",
       clientid: client.id,
-      state: this.simulator.getOldestState(),
+      state: oldestState,
       events: this.simulator.getEvents(),
       currentframe: this.simulator.getCurrentFrame(),
     });
@@ -152,13 +158,27 @@ class Client {
   }
 
   handleSyn(msg) {
-    this.lastframe = msg.frame;
+    this.lastFrame = msg.frame;
     this.server.recalculateStableFrame();
+    const stableFrame = this.server.stableFrame;
+    const stableMoment = this.server.simulator.getMoment(stableFrame);
+    // const stableState = stableMoment.state;
+
+    // NOTE: The hashes between server and client are different, while the
+    // serialized+deserialized states are equal. It's still unknown why this is.
+    // When hashing we first need to stringify. This will result in a stable
+    // hash.
+
+    const stableStateHash = hash(stringify(stableMoment.state));
     this.messenger.send({
       type: "ack",
       oframe: msg.frame,
       nframe: this.server.simulator.getCurrentFrame(),
-      stableframe: this.server.stableframe,
+      stableFrame,
+      // We can send over the stableState, so that the client can compare the
+      // full state. Uncomment the following line:
+      // stableState,
+      stableStateHash,
     });
   }
 
@@ -167,10 +187,9 @@ class Client {
   }
 
   handleGameInput({ frame, input }) {
-    this.server.simulator.pushEvent({
+    this.server.simulator.insertEvent(frame, {
       type: "game-input",
       clientid: this.id,
-      frame,
       input,
     });
     this.broadcast({

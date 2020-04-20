@@ -67,9 +67,11 @@ class Simulator {
    * Calculate the next state from the current state and current events.
    */
   nextStateFromMoment(moment) {
-    var newstate = this.game.update(moment.state, moment.events);
+    const newstate = replaceField(Math, 'random', throwNonDeterministicError, () => {
+      return this.game.update(moment.state, moment.events);
+    });
     assert(newstate.frame === moment.state.frame + 1);
-    return newstate;
+    return deepFreeze(newstate);
   }
 
   /**
@@ -186,6 +188,16 @@ class Simulator {
     }
   }
 
+  setState(state) {
+    this.moments = [{
+      state,
+      events: []
+    }];
+    const events = this.getEvents();
+    this.futureEvents = events;
+    this.recalculateStates(state.frame);
+  }
+
   getEvents() {
     var events = [];
     for (var i = this.moments.length - 1; i >= 0; i--) {
@@ -258,6 +270,36 @@ class Simulator {
  * No maximum of frames: handle frame removal yourself.
  */
 Simulator.defaultMaxFramesInHistory = -1
+
+function deepFreeze(object) {
+  // Retrieve the property names defined on object
+  var propNames = Object.getOwnPropertyNames(object);
+
+  // Freeze properties before freezing self
+  for (let name of propNames) {
+    let value = object[name];
+
+    if(value && typeof value === "object") { 
+      deepFreeze(value);
+    }
+  }
+
+  return Object.freeze(object);
+}
+
+function replaceField(obj, fieldName, replacement, blockFn) {
+  const previousValue = obj[fieldName]
+  obj[fieldName] = replacement;
+  try {
+    return blockFn();
+  } finally {
+    obj[fieldName] = previousValue
+  }
+}
+
+function throwNonDeterministicError() {
+  throw new Error('Non-deterministic functions may not be called within game updates');
+}
 
 module.exports = {
   Simulator

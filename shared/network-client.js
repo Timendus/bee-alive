@@ -1,4 +1,6 @@
 const log = require("./log");
+const { stringify, parse } = require('../shared/deterministic-json')
+const hash = require('object-hash');
 
 function toMs(frames) {
   return frames * (1000 / 30);
@@ -90,7 +92,26 @@ class NetworkClient {
     var roundtripFrames = now - msg.oframe;
     var clientFrames = msg.oframe + roundtripFrames * 0.5;
     var framesDifference = clientFrames - msg.nframe;
-    this.simulator.forgetMomentsBefore(msg.stableframe);
+    this.simulator.forgetMomentsBefore(msg.stableFrame);
+
+    // We received a state hash from the server. We'll check whether the state is equal.
+    if (msg.stableStateHash) {
+      const serverStateHash = msg.stableStateHash;
+      const clientState = this.simulator.getMoment(msg.stableFrame).state;
+      const clientStateHash = hash(stringify(clientState));
+      if (serverStateHash !== clientStateHash) {
+        log.warn("Out of sync", { serverStateHash, clientStateHash })
+      }
+    }
+
+    // We received a state from the server. We'll check whether the state is equal.
+    if (msg.stableState) {
+      const serverState = msg.stableState;
+      const clientState = this.simulator.getMoment(msg.stableFrame).state;
+      if (stringify(serverState) !== stringify(clientState)) {
+        log.warn("Out of sync", { clientState, serverState })
+      }
+    }
 
     if (-framesDifference >= 30) {
       // We're too far behind compared to the server (1 second),
@@ -161,13 +182,13 @@ class NetworkClient {
     });
   }
   gameInput(input) {
+    const clientid = this.clientid;
     const frame = this.simulator.getCurrentFrame();
-    this.simulator.pushEvent({
+    this.simulator.insertEvent(frame, {
       type: "game-input",
-      frame,
       input,
-      clientid: this.clientid,
-    })
+      clientid,
+    });
     this.messenger.send({
       type: "game-input",
       frame,
