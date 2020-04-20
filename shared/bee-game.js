@@ -48,14 +48,15 @@ class BeeGame {
 
   update(state, events) {
     state = events.reduce(handleEvent, state)
+    const finished = state.remaining < 1;
     state = {
       ...state,
       frame: state.frame + 1,
       remaining: state.remaining - 1,
-      finished: state.remaining < 1,
+      finished: finished,
       winning: winningTeams(state.teams, state.boids),
-      players: state.players.map(player => updatePlayer(player)),
-      boids: updateBoids(state.boids, { players: state.players }),
+      players: finished ? state.players : state.players.map(player => updatePlayer(player)),
+      boids: finished ? state.boids : updateBoids(state.boids, { players: state.players }),
     };
     log.debug("Update state", { state, events });
     return state;
