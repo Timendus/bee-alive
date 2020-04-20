@@ -95,7 +95,7 @@ class BeeGame {
             ...state.gameplay,
             state: state.players.some(p => !p.ready) ? WAITING_FOR_READY :
                       remaining == 0 ? ROUND_FINISHED : PLAYING,
-            remaining: remaining || 5 * 30,
+            remaining: remaining || 5 * framesPerSecond,
             winning: winningTeams(state.teams, state.boids)
           },
           players: state.players.map(player => updatePlayer(player)),
@@ -125,12 +125,12 @@ class BeeGame {
           gameplay: {
             ...state.gameplay,
             state: PLAYING,
-            remaining: gameDuration * 30
+            remaining: gameDuration * framesPerSecond
           },
-          players: state.players.map(player => {
-            player.position = teams[player.teamId].position;
-            return player;
-          }),
+          players: state.players.map(player => ({
+            ...player,
+            position: teams[player.teamId].position
+          })),
           boids: [
             ...teams.flatMap(team =>
               createBoidSwarm({
