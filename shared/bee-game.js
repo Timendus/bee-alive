@@ -18,15 +18,15 @@ function compare(va,vb) {
 const teams = [{
   id: 0,
   position: createV(64, 512),
-  boidCount: 10
+  boidCount: 4
 }, {
   id: 1,
   position: createV(1024 - 64, 512),
-  boidCount: 10
+  boidCount: 4
 }, {
   id: 2,
   position: false,
-  boidCount: 20
+  boidCount: 10
 }];
 
 class BeeGame {
@@ -62,7 +62,7 @@ class BeeGame {
       finished: finished,
       winning: winningTeams(state.teams, state.boids),
       players: finished ? state.players : state.players.map(player => updatePlayer(player)),
-      boids: finished ? state.boids : updateBoids(state.boids, { players: state.players }),
+      boids: finished ? state.boids : updateBoids(state.boids, { players: state.players }).concat(newBoids()),
     };
     log.debug("Update state", { state, events });
     return state;
@@ -117,12 +117,25 @@ function boidsInACircle(index, count, center) {
 function boidsAllOverThePlace() {
   return {
     position: createV(random(10, 1014), random(10, 1014)),
-    velocity: zeroV,
+    velocity: randomV(),
   }
 }
 
 function random(min, max) {
   return min + Math.floor(Math.random() * Math.floor(max + 1 - min));
+}
+
+function newBoids() {
+  const twoBoidsEveryXFrames = 100;
+  const diceRoll = random(1, twoBoidsEveryXFrames);
+  if ( diceRoll < twoBoidsEveryXFrames - 2 ) return [];
+  return [
+    {
+      position: teams[diceRoll - twoBoidsEveryXFrames + 2].position,
+      velocity: randomV(),
+      teamId: teams[2].id
+    }
+  ];
 }
 
 function updatePlayer(player) {
@@ -365,6 +378,13 @@ function updateBoid(boid, { boids, allies }) {
 }
 
 const zeroV = { x: 0, y: 0 };
+
+function randomV() {
+  return {
+    x: random(-3,3),
+    y: random(-3,3)
+  }
+}
 
 function floorV(v) {
   return {
