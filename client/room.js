@@ -43,6 +43,10 @@ class Room {
     this._events[evnt].push(func);
   }
 
+  removeEventListener(evnt) {
+    this._events[evnt] = [];
+  }
+
   players() {
     return this._players;
   }
