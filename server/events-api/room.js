@@ -126,7 +126,7 @@ module.exports = async io => {
   }
 
   async function updateLobbyPlayerList() {
-    const players = await playersInLobby();
+    const players = playersInLobby();
     io.emit('lobbyPlayers', players);
   }
 
@@ -152,16 +152,12 @@ module.exports = async io => {
   }
 
   function playersInLobby() {
-    return new Promise((resolve, reject) => {
-      io.clients((error, clients) => {
-        if (error) reject(error);
-        resolve(clients.map(c => ({
-          client: c,
-          userName: playerName(c),
-          inRoom: Object.keys(io.connected[c].rooms).length > 1
-        })));
-      })
-    });
+    return Object.values(io.connected)
+                 .map(client => ({
+      client: client.id,
+      userName: playerName(client.id),
+      inRoom: Object.keys(client.rooms).length > 1
+    }));
   }
 
 }
