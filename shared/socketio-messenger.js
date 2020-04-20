@@ -1,8 +1,10 @@
 class SocketIOMessenger {
   constructor(socket) {
     this.socket = socket;
-    this.socket.on('message', this.handleMessage.bind(this));
-    this.socket.on('close', this.handleClose.bind(this));
+    this._messageHandler = this.handleMessage.bind(this);
+    this._closeHandler = this.handleClose.bind(this);
+    this.socket.on('message', this._messageHandler);
+    this.socket.on('close', this._closeHandler);
   }
 
   handleMessage(message) {
@@ -10,7 +12,7 @@ class SocketIOMessenger {
   }
 
   handleClose() {
-    this.onclose();
+    this.close();
   }
 
   send(message) {
@@ -18,7 +20,8 @@ class SocketIOMessenger {
   }
 
   close() {
-    // this.socket.close();
+    this.socket.off('message', this._messageHandler);
+    this.socket.off('close', this._closeHandler);
   }
 }
 
