@@ -496,6 +496,7 @@ function handlePlayerEvent(players, event) {
 function handlePlayerInput(player, input) {
   return {
     ...player,
+    ready: input.key == 'ready' ? !player.ready : player.ready,
     input: {
       ...player.input,
       [input.key]: input.direction === 'down',
