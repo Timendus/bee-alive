@@ -1,5 +1,5 @@
 const log = require("./log");
-const { stringify } = require('../shared/deterministic-json')
+const { stringify, parse } = require('../shared/deterministic-json')
 const hash = require('object-hash');
 
 function toMs(frames) {
@@ -98,7 +98,7 @@ class NetworkClient {
     if (msg.stableStateHash) {
       const serverStateHash = msg.stableStateHash;
       const clientState = this.simulator.getMoment(msg.stableFrame).state;
-      const clientStateHash = hash(clientState);
+      const clientStateHash = hash(stringify(clientState));
       if (serverStateHash !== clientStateHash) {
         log.warn("Out of sync", { serverStateHash, clientStateHash })
       }
