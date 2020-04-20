@@ -30,12 +30,16 @@ const teams = [{
 }];
 
 const gameDuration = 30; // seconds
+const framesPerSecond = 30;
 
 class BeeGame {
   init() {
+    const seed = Math.floor(Math.random() * 99999);
+    const random = new Random(seed);
     const state = {
       frame: 0,
-      remaining: gameDuration * 30,
+      seed,
+      remaining: gameDuration * framesPerSecond,
       finished: false,
       winning: [],
       players: [],
@@ -46,11 +50,12 @@ class BeeGame {
             center: team.position,
             count: team.boidCount,
             teamId: team.id,
+            random,
           })
         ),
       ],
       randomBoids: [
-        ...randomBoids(10, gameDuration * 30)
+        ...randomBoids(10, gameDuration * framesPerSecond, random)
       ]
     };
     log.debug("Init state", { state });
@@ -89,14 +94,14 @@ class BeeGame {
 const maxSpeed = 1000;
 const maxForce = 0.01;
 
-function createBoidSwarm({ center, count, teamId }) {
+function createBoidSwarm({ center, count, teamId, random }) {
   const boids = [];
   for (let index = 0; index < count; index++) {
     let movement;
     if ( center ) {
       movement = boidsInACircle(index, count, center);
     } else {
-      movement = boidsAllOverThePlace();
+      movement = boidsAllOverThePlace(random);
     }
 
     boids.push({
@@ -120,30 +125,24 @@ function boidsInACircle(index, count, center) {
   };
 }
 
-function boidsAllOverThePlace() {
+function boidsAllOverThePlace(random) {
   return {
-    position: createV(random(10, 1014), random(10, 1014)),
-    velocity: randomV(),
+    position: createV(random.nextInt(10, 1014), random.nextInt(10, 1014)),
+    velocity: multiplyV(random.nextNormalizedVector(), random.nextFloat(0, 3)),
   }
-}
-
-// Note: only for use in init function!
-// Otherwise we're not deterministic
-function random(min, max) {
-  return min + Math.floor(Math.random() * Math.floor(max + 1 - min));
 }
 
 function newBoids(frame, randomBoids) {
   return randomBoids.filter(b => b.frame == frame);
 }
 
-function randomBoids(numberOfBoids, frames) {
+function randomBoids(numberOfBoids, frames, random) {
   const boids = [];
   for ( let i = 0; i < numberOfBoids; i++ ) {
     boids.push({
-      frame: random(0, frames),
-      position: teams[random(0,1)].position,
-      velocity: randomV(),
+      frame: random.nextInt(0, frames),
+      position: teams[random.nextInt(0,1)].position,
+      velocity: random.nextNormalizedVector(),
       teamId: teams[2].id
     });
   }
@@ -391,15 +390,6 @@ function updateBoid(boid, { boids, allies }) {
 
 const zeroV = { x: 0, y: 0 };
 
-// Note: only for use in init function!
-// Otherwise we're not deterministic
-function randomV() {
-  return {
-    x: random(-3,3),
-    y: random(-3,3)
-  }
-}
-
 function floorV(v) {
   return {
     x: Math.floor(v.x * 1000) / 1000,
@@ -501,6 +491,59 @@ function handlePlayerInput(player, input) {
       [input.key]: input.direction === 'down',
     }
   };
+}
+
+function alea(s0, s1, c) {
+  return function aleaStep() {
+    var t = 2091639 * s0 + c * 2.3283064365386963e-10;
+    s0 = s1;
+    return s1 = t - (c = t | 0);
+  };
+}
+
+function aleaFromSeed(seed) {
+  var s0, s1, h, n = 0xefc8249d, v;
+  seed = 'X' + seed;
+  for (var i = 0; i < 2; i++) {
+    for (var j = 0; j < seed.length; j++) {
+      n += seed.charCodeAt(j);
+      h = 0.02519603282416938 * n;
+      n = h >>> 0; h -= n; h *= n;
+      n = h >>> 0; h -= n; n += h * 0x100000000;
+    }
+    v = (n >>> 0) * 2.3283064365386963e-10;
+    if (i === 0) s0 = v; else s1 = v;
+  }
+  return alea(s0, s1, 1);
+}
+
+class Random {
+  constructor(seed) {
+    this.aleaStep = aleaFromSeed(seed);
+  }
+
+  /**
+   * Return new pseudo-random value between 0 and 1
+  */
+  next() {
+    return this.aleaStep();
+  }
+
+  nextInt(min, max) {
+    return min + Math.floor(this.next() * (max - min + 1));
+  }
+
+  nextFloat(min = 0, max = 1) {
+    return min + this.next() * (max - min);
+  }
+
+  nextNormalizedVector() {
+    const angle = this.nextFloat(0, Math.PI * 2);
+    return createV(
+      Math.cos(angle),
+      Math.sin(angle)
+    )
+  }
 }
 
 module.exports = {
