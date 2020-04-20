@@ -1,4 +1,5 @@
 @import './colours';
+@import './hive-borders';
 
 #user-name-selection {
 
@@ -13,6 +14,8 @@
   }
 
   .center {
+    @include hive-borders($lightYellow, $darkYellow);
+
     width: 400px;
     height: 400px;
     padding: 2em;

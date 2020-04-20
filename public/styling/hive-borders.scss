@@ -1,0 +1,28 @@
+@import './colours';
+
+@mixin hive-borders($background, $border) {
+  position: relative;
+
+  &:before, &:after {
+    content: ' ';
+    display: block;
+    position: absolute;
+    width: 50px;
+    height: 30px;
+    transform: rotateZ(-30deg);
+
+    background-color: $background;
+  }
+
+  &:before {
+    top: -20px;
+    left: -14px;
+    border-bottom: 4px solid $border;
+  }
+
+  &:after {
+    right: -14px;
+    bottom: -20px;
+    border-top: 4px solid $border;
+  }
+}
