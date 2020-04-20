@@ -127,10 +127,11 @@ class NetworkClient {
     });
   }
 
-  handleConnect({ frame, clientid }) {
+  handleConnect({ frame, clientid, clientName }) {
     this.simulator.insertEvent(frame, {
       type: "connect",
       clientid,
+      clientName
     });
   }
 

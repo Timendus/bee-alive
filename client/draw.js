@@ -1,17 +1,21 @@
 const Textures = require('./textures');
 
+const WAITING_FOR_READY = 0;
+const PLAYING = 1;
+const ROUND_FINISHED = 2;
+
 module.exports = frame => {
   drawBackground(frame);
 
-  if ( !frame.state.playing && frame.state.remaining <= 1 )
-    return drawFinishedState(frame, frame.state.winning, frame.state.boids);
+  if ( frame.state.gameplay.state == ROUND_FINISHED )
+    return drawFinishedState(frame, frame.state.gameplay.winning, frame.state.boids);
 
-  drawRemainingTime(frame, frame.state.remaining);
+  drawRemainingTime(frame, frame.state.gameplay.remaining);
   drawHives(frame, frame.state.teams);
   drawBoids(frame, frame.state.boids);
   drawPlayers(frame, frame.state.players);
 
-  if ( !frame.state.playing )
+  if ( frame.state.gameplay.state == WAITING_FOR_READY )
     drawInstruction(frame);
 }
 
@@ -35,7 +39,8 @@ function drawFinishedState(frame, winning, boids) {
   frame.ctx.fillText(winningText, 512 * frame.scale, 430 * frame.scale);
   frame.ctx.font = '30px Indie Flower';
   frame.ctx.fillText(scoreText, 512 * frame.scale, 490 * frame.scale);
-  frame.ctx.fillText("Press a key to play again!", 512 * frame.scale, 540 * frame.scale);
+  const time = new Date((frame.state.gameplay.remaining + 30) * 1000 / 30).toISOString().substr(18, 1);
+  frame.ctx.fillText(`New round in ${time}`, 512 * frame.scale, 540 * frame.scale);
 }
 
 function drawInstruction(frame) {
@@ -48,7 +53,7 @@ function drawInstruction(frame) {
 
   let ycoord = 600;
   frame.state.players.forEach(player => {
-    frame.ctx.fillText(`Player ${player.id + 1}: ${player.ready ? 'Ready!' : 'Not ready'}`, 512 * frame.scale, ycoord * frame.scale);
+    frame.ctx.fillText(`${player.name}: ${player.ready ? 'Ready!' : 'Not ready'}`, 512 * frame.scale, ycoord * frame.scale);
     ycoord += 50;
   });
 }
