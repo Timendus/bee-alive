@@ -108,9 +108,13 @@ function updatePlayer(player) {
 
   return {
     ...player,
-    position: floorV(addV(player.position, velocity)),
+    position: keepInCanvas(floorV(addV(player.position, velocity))),
     velocity: floorV(velocity),
   }
+}
+
+function keepInCanvas(position) {
+  return {x: Math.max(10, Math.min(1014, position.x)), y: Math.max(10, Math.min(1014, position.y))};
 }
 
 function winningTeams(teams, boids) {
@@ -320,7 +324,7 @@ function updateBoid(boid, { boids, allies }) {
 
   return {
     ...boid,
-    position: floorV(addV(boid.position, boid.velocity)),
+    position: keepInCanvas(floorV(addV(boid.position, boid.velocity))),
     velocity: floorV(addV(boid.velocity, acceleration)),
   };
 }
