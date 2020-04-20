@@ -18,22 +18,31 @@ function compare(va,vb) {
 const teams = [{
   id: 0,
   position: createV(64, 512),
+  boidCount: 10
 }, {
   id: 1,
-  position: createV(1024 - 64, 512)
+  position: createV(1024 - 64, 512),
+  boidCount: 10
+}, {
+  id: 2,
+  position: false,
+  boidCount: 20
 }];
 
 class BeeGame {
   init() {
     const state = {
       frame: 0,
+      remaining: 30 * 30,  // A game lasts 30 seconds (times 30 frames)
+      finished: false,
+      winning: [],
       players: [],
       teams: teams,
       boids: [
         ...teams.flatMap(team =>
           createBoidSwarm({
             center: team.position,
-            count: 10,
+            count: team.boidCount,
             teamId: team.id,
           })
         ),
@@ -45,11 +54,15 @@ class BeeGame {
 
   update(state, events) {
     state = events.reduce(handleEvent, state)
+    const finished = state.remaining < 1;
     state = {
       ...state,
       frame: state.frame + 1,
-      players: state.players.map(player => updatePlayer(player)),
-      boids: updateBoids(state.boids, { players: state.players }),
+      remaining: state.remaining - 1,
+      finished: finished,
+      winning: winningTeams(state.teams, state.boids),
+      players: finished ? state.players : state.players.map(player => updatePlayer(player)),
+      boids: finished ? state.boids : updateBoids(state.boids, { players: state.players }),
     };
     log.debug("Update state", { state, events });
     return state;
@@ -73,20 +86,43 @@ const maxForce = 0.01;
 function createBoidSwarm({ center, count, teamId }) {
   const boids = [];
   for (let index = 0; index < count; index++) {
-    const angle = (Math.PI * 2) * index / count;
-    const direction = createV(
-      Math.cos(angle),
-      Math.sin(angle)
-    );
-    const position = addV(center, multiplyV(direction, 50));
-    const velocity = multiplyV(perpendicularClockwiseV(direction), 1);
+    let movement;
+    if ( center ) {
+      movement = boidsInACircle(index, count, center);
+    } else {
+      movement = boidsAllOverThePlace();
+    }
+
     boids.push({
-      position,
-      velocity,
+      position: movement.position,
+      velocity: movement.velocity,
       teamId,
-    })
+    });
   }
   return boids;
+}
+
+function boidsInACircle(index, count, center) {
+  const angle = (Math.PI * 2) * index / count;
+  const direction = createV(
+    Math.cos(angle),
+    Math.sin(angle)
+  );
+  return {
+    position: addV(center, multiplyV(direction, 50)),
+    velocity: multiplyV(perpendicularClockwiseV(direction), 1)
+  };
+}
+
+function boidsAllOverThePlace() {
+  return {
+    position: createV(random(10, 1014), random(10, 1014)),
+    velocity: zeroV,
+  }
+}
+
+function random(min, max) {
+  return min + Math.floor(Math.random() * Math.floor(max + 1 - min));
 }
 
 function updatePlayer(player) {
@@ -101,30 +137,104 @@ function updatePlayer(player) {
 
   return {
     ...player,
-    position: roundV(addV(player.position, velocity)),
-    velocity: roundV(velocity),
+    position: keepInCanvas(floorV(addV(player.position, velocity))),
+    velocity: floorV(velocity),
   }
+}
+
+function keepInCanvas(position) {
+  return {
+    x: Math.max(10, Math.min(1014, position.x)),
+    y: Math.max(10, Math.min(1014, position.y))
+  };
+}
+
+function winningTeams(teams, boids) {
+  let max = 0;
+  let winners = [];
+  teams.forEach(team => {
+    const numBoids = boids.filter(boid => boid.teamId == team.id).length;
+    if ( numBoids == max ) {
+      winners.push(team);
+    }
+    if ( numBoids > max ) {
+      max = numBoids;
+      winners = [team];
+    }
+  });
+  return winners;
 }
 
 function updateBoids(boids, { players }) {
   // We interpret players as 'other surrounding' boids as well.
-  const entities = boids.concat(players);
-  const teamIds = [0, 1];
-  const teams = teamIds.map(teamId => {
-    const teamEntities = entities.filter(boid => boid.teamId === teamId);
-    const teamPlayers = players.filter(player => player.teamId === teamId);
-    const center = teamEntities.length && multiplyV(teamEntities.reduce(addV, zeroV), 1 / teamEntities.length);
-    const spread = teamEntities.length && teamEntities.map(entity => distanceV(center, entity.position)).reduce((total, distance) => total + distance, 0);
-    return {
-      id: teamId,
-      entities: teamEntities,
-      players: teamPlayers,
-      center,
-      spread
-    };
-  });
+  const boidsAndPlayers = boids.concat(players);
+  const teamIds = teams.map(team => team.id);
+  const teamsObj = teamIds.map(teamId => ({
+    boids: boidsAndPlayers.filter(boid => boid.teamId === teamId),
+    allies: players.filter(player => player.teamId === teamId),
+  }));
 
-  return boids.map((boid) => updateBoid(boid, { myTeam: teams[boid.teamId], enemyTeam: teams[(boid.teamId + 1) % 2] }));
+  const { winner, loser } = duel(teamsObj);
+  takeOverNearestBoid(winner, loser);
+  takeOverNearestBoid(teamsObj[0], teamsObj[2]);
+  takeOverNearestBoid(teamsObj[1], teamsObj[2]);
+
+  return boids.map((boid) => updateBoid(boid, teamsObj[boid.teamId]));
+}
+
+function duel(teams) {
+  if ( teamSpread(teams[0]) > teamSpread(teams[1]) ) {
+    return {
+      winner: teams[1],
+      loser: teams[0]
+    };
+  } else {
+    return {
+      winner: teams[0],
+      loser: teams[1]
+    };
+  }
+}
+
+function teamSpread(team) {
+  const xCoords = team.boids.map(b => b.position.x);
+  const yCoords = team.boids.map(b => b.position.y);
+  const boundingBox = {
+    width: Math.max(...xCoords) - Math.min(...xCoords),
+    height: Math.max(...yCoords) - Math.min(...yCoords)
+  };
+  boundingBox.surface = boundingBox.width * boundingBox.height;
+  return boundingBox.surface;
+}
+
+function teamCenter(team) {
+  let xCoords, yCoords;
+  if ( team.allies.length > 0 ) {
+    xCoords = team.allies.map(a => a.position.x);
+    yCoords = team.allies.map(a => a.position.y);
+  } else {
+    xCoords = team.boids.map(b => b.position.x);
+    yCoords = team.boids.map(b => b.position.y);
+  }
+
+  return {
+    x: xCoords.reduce((sum, x) => sum + x, 0) / xCoords.length,
+    y: yCoords.reduce((sum, y) => sum + y, 0) / yCoords.length
+  }
+}
+
+function takeOverNearestBoid(winner, loser) {
+  // TODO: don't take over all boids ;)
+  const takeOverDistance = 200;
+  if (winner.boids.length == 0) return;
+  const center = teamCenter(winner);
+  for (const boid of loser.boids) {
+    const distance = distanceV(boid.position, center);
+    if (distance >= takeOverDistance) {
+      continue;
+    }
+    boid.teamId = winner.boids[0].teamId;
+  }
 }
 
 function getSeparation(boid, boids) {
@@ -232,12 +342,11 @@ function getPlayerAttraction(boid, players) {
   ].reduce(addV, zeroV);
 }
 
-function updateBoid(boid, { myTeam, enemyTeam }) {
-  const { entities, players } = myTeam;
-  const separationV = getSeparation(boid, entities, { desiredSeparation: 20 });
-  const alignmentV = getAlignment(boid, entities, { neighborDistance: 50 });
-  const cohesionV = getCohesion(boid, entities, { neighborDistance: 100 });
-  const playerAttractionV = getPlayerAttraction(boid, players);
+function updateBoid(boid, { boids, allies }) {
+  const separationV = getSeparation(boid, boids, { desiredSeparation: 20 });
+  const alignmentV = getAlignment(boid, boids, { neighborDistance: 50 });
+  const cohesionV = getCohesion(boid, boids, { neighborDistance: 100 });
+  const playerAttractionV = getPlayerAttraction(boid, allies);
   let acceleration = [
     multiplyV(separationV, 0.000015),
     multiplyV(alignmentV,  0.000001),
@@ -248,24 +357,19 @@ function updateBoid(boid, { myTeam, enemyTeam }) {
   // Drag
   acceleration = addV(acceleration, multiplyV(boid.velocity, -0.05));
 
-  const teamLosing = myTeam.spread < enemyTeam.spread;
-  const boidLosing = teamLosing && enemyTeam.entities.some(entity => distanceV(boid.position, entity.position) < 200);
-  const teamId = boidLosing ? enemyTeam.id : myTeam.id;
-
   return {
     ...boid,
-    teamId,
-    position: roundV(addV(boid.position, boid.velocity)),
-    velocity: roundV(addV(boid.velocity, acceleration)),
+    position: keepInCanvas(floorV(addV(boid.position, boid.velocity))),
+    velocity: floorV(addV(boid.velocity, acceleration)),
   };
 }
 
 const zeroV = { x: 0, y: 0 };
 
-function roundV(v) {
+function floorV(v) {
   return {
-    x: Math.round(v.x * 1000) / 1000,
-    y: Math.round(v.y * 1000) / 1000,
+    x: Math.floor(v.x * 1000) / 1000,
+    y: Math.floor(v.y * 1000) / 1000,
   }
 }
 
@@ -324,9 +428,6 @@ function limitV(v, limit) {
 }
 
 function handleEvent(state, event) {
-  if (event.type === 'game-input') {
-    console.log({ frame: state.frame, input: event.input })
-  }
   return {
     ...state,
     players: handlePlayerEvent(state.players, event),
@@ -334,7 +435,7 @@ function handleEvent(state, event) {
 }
 
 function createPlayer({ id, teamId = null }) {
-  teamId = teamId || (id % teams.length)
+  teamId = teamId || (id % 2)
   const team = teams[teamId];
   const position = team.position;
   const velocity = zeroV;

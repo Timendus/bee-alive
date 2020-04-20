@@ -1,0 +1,19 @@
+@import './colours';
+@import './hive-borders';
+
+.player-list {
+  @include hive-borders($lightYellow, $darkYellow);
+
+  min-height: 300px;
+  margin: 4em 0;
+
+  border: 4px solid $darkYellow;
+  background-color: $yellow;
+
+  h3 {
+    margin: 0;
+    padding: 1em;
+
+    text-align: center;
+  }
+}
