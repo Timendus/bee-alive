@@ -29,11 +29,13 @@ const teams = [{
   boidCount: 10
 }];
 
+const gameDuration = 30; // seconds
+
 class BeeGame {
   init() {
     const state = {
       frame: 0,
-      remaining: 30 * 30,  // A game lasts 30 seconds (times 30 frames)
+      remaining: gameDuration * 30,
       finished: false,
       winning: [],
       players: [],
@@ -47,6 +49,9 @@ class BeeGame {
           })
         ),
       ],
+      randomBoids: [
+        ...randomBoids(10, gameDuration * 30)
+      ]
     };
     log.debug("Init state", { state });
     return state;
@@ -62,7 +67,7 @@ class BeeGame {
       finished: finished,
       winning: winningTeams(state.teams, state.boids),
       players: finished ? state.players : state.players.map(player => updatePlayer(player)),
-      boids: finished ? state.boids : updateBoids(state.boids, { players: state.players }).concat(newBoids()),
+      boids: finished ? state.boids : updateBoids(state.boids, { players: state.players }).concat(newBoids(state.frame, state.randomBoids)),
     };
     log.debug("Update state", { state, events });
     return state;
@@ -121,21 +126,27 @@ function boidsAllOverThePlace() {
   }
 }
 
+// Note: only for use in init function!
+// Otherwise we're not deterministic
 function random(min, max) {
   return min + Math.floor(Math.random() * Math.floor(max + 1 - min));
 }
 
-function newBoids() {
-  const twoBoidsEveryXFrames = 100;
-  const diceRoll = random(1, twoBoidsEveryXFrames);
-  if ( diceRoll < twoBoidsEveryXFrames - 2 ) return [];
-  return [
-    {
-      position: teams[diceRoll - twoBoidsEveryXFrames + 2].position,
+function newBoids(frame, randomBoids) {
+  return randomBoids.filter(b => b.frame == frame);
+}
+
+function randomBoids(numberOfBoids, frames) {
+  const boids = [];
+  for ( let i = 0; i < numberOfBoids; i++ ) {
+    boids.push({
+      frame: random(0, frames),
+      position: teams[random(0,1)].position,
       velocity: randomV(),
       teamId: teams[2].id
-    }
-  ];
+    });
+  }
+  return boids;
 }
 
 function updatePlayer(player) {
