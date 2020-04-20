@@ -3,13 +3,16 @@ const Textures = require('./textures');
 module.exports = frame => {
   drawBackground(frame);
 
-  if ( frame.state.finished )
+  if ( !frame.state.playing && frame.state.remaining <= 1 )
     return drawFinishedState(frame, frame.state.winning, frame.state.boids);
 
   drawRemainingTime(frame, frame.state.remaining);
   drawHives(frame, frame.state.teams);
   drawBoids(frame, frame.state.boids);
   drawPlayers(frame, frame.state.players);
+
+  if ( !frame.state.playing )
+    drawInstruction(frame);
 }
 
 function drawBackground(frame) {
@@ -33,6 +36,15 @@ function drawFinishedState(frame, winning, boids) {
   frame.ctx.font = '30px Indie Flower';
   frame.ctx.fillText(scoreText, 512 * frame.scale, 490 * frame.scale);
   frame.ctx.fillText("Press a key to play again!", 512 * frame.scale, 540 * frame.scale);
+}
+
+function drawInstruction(frame) {
+  frame.ctx.textAlign = 'center';
+  frame.ctx.font = '48px Indie Flower';
+  frame.ctx.fillText("Press R when you're ready!", 512 * frame.scale, 430 * frame.scale);
+  frame.ctx.font = '30px Indie Flower';
+  frame.ctx.fillText("Use the WSAD keys to move around", 512 * frame.scale, 490 * frame.scale);
+  frame.ctx.fillText("and claim all the worker bees!", 512 * frame.scale, 540 * frame.scale);
 }
 
 function drawRemainingTime(frame, remaining) {
