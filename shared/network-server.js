@@ -50,10 +50,12 @@ class NetworkServer {
     this.simulator.pushEvent({
       type: "connect",
       clientid: client.id,
+      clientName: client.name
     });
     client.broadcast({
       type: "connect",
       clientid: client.id,
+      clientName: client.name,
       frame: this.simulator.getCurrentFrame(),
     });
     client.messenger.send({
