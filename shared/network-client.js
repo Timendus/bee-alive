@@ -1,5 +1,6 @@
 const log = require("./log");
 const { stringify } = require('../shared/deterministic-json')
+const hash = require('object-hash');
 
 function toMs(frames) {
   return frames * (1000 / 30);
@@ -94,14 +95,12 @@ class NetworkClient {
     this.simulator.forgetMomentsBefore(msg.stableFrame);
 
     // We received a state from the server. We'll check whether the state is equal.
-    if (msg.stableState) {
-      const serverState = msg.stableState;
+    if (msg.stableStateHash) {
+      const serverStateHash = msg.stableStateHash;
       const clientState = this.simulator.getMoment(serverState.frame).state;
-      const serverStateString = stringify(serverState);
-      const clientStateString = stringify(clientState);
-      if (serverStateString !== clientStateString) {
-        log.warn("Out of sync", { serverState, clientState })
-        this.simulator.setState(msg.stableState);
+      const clientStateHash = hash(clientState);
+      if (serverStateHash !== clientStateHash) {
+        log.warn("Out of sync")
       }
     }
 

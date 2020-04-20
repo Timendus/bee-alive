@@ -1,5 +1,6 @@
 const log = require('../shared/log')
 const { stringify } = require('../shared/deterministic-json')
+const hash = require('object-hash');
 
 class NetworkServer {
   constructor(simulator) {
@@ -162,13 +163,13 @@ class Client {
     this.server.recalculateStableFrame();
     const stableFrame = this.server.stableFrame;
     const stableMoment = this.server.simulator.getMoment(stableFrame);
-    const stableState = stableMoment.state;
+    const stableStateHash = hash(stableMoment.state);
     this.messenger.send({
       type: "ack",
       oframe: msg.frame,
       nframe: this.server.simulator.getCurrentFrame(),
       stableFrame,
-      stableState,
+      stableStateHash,
     });
   }
 
