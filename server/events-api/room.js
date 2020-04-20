@@ -12,17 +12,18 @@ class Room {
   }
 
   joinSocket(socket, name) {
-    const client = this._networkServer.createClient(new SocketIOMessenger(socket), name);
-    socket.networkClient = client;
+    this._messenger = new SocketIOMessenger(socket);
+    this._networkClient = this._networkServer.createClient(this._messenger, name);
     socket.join(this.roomId);
   }
 
   leaveSocket(socket) {
-    if (!socket.networkClient) {
+    if (!this._networkClient) {
       throw new Error('The socket does not have a client');
     }
     socket.leave(this.roomId);
-    this._networkServer.removeClient(socket.networkClient);
+    this._messenger.close();
+    this._networkServer.removeClient(this._networkClient);
   }
 
   close() {
