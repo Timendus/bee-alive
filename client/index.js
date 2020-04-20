@@ -11,12 +11,9 @@ function drawImage(ctx, image, x, y, scale, rotation){
 
 window.addEventListener('load', () => {
 
-  const music = new Audio('sounds/background-music-1.mp4');
-  music.loop = true;
-  music.play();
-
   const lobby = new Lobby();
   let room = null;
+  let music = null;
 
   const roomMessages     = document.getElementById('roomMessages');
   const roomChat         = document.getElementById('roomChat');
@@ -151,6 +148,10 @@ window.addEventListener('load', () => {
     document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
     document.getElementById('front-porch').classList.add('active');
     e.preventDefault();
+
+    music = new Audio('sounds/background-music-1.mp4');
+    music.loop = true;
+    music.play();
   });
 
 });
