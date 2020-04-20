@@ -67,7 +67,9 @@ class Simulator {
    * Calculate the next state from the current state and current events.
    */
   nextStateFromMoment(moment) {
-    var newstate = this.game.update(moment.state, moment.events);
+    const newstate = replaceField(Math, 'random', throwNonDeterministicError, () => {
+      return this.game.update(moment.state, moment.events);
+    });
     assert(newstate.frame === moment.state.frame + 1);
     return deepFreeze(newstate);
   }
@@ -283,6 +285,20 @@ function deepFreeze(object) {
   }
 
   return Object.freeze(object);
+}
+
+function replaceField(obj, fieldName, replacement, blockFn) {
+  const previousValue = obj[fieldName]
+  obj[fieldName] = replacement;
+  try {
+    return blockFn();
+  } finally {
+    obj[fieldName] = previousValue
+  }
+}
+
+function throwNonDeterministicError() {
+  throw new Error('Non-deterministic functions may not be called within game updates');
 }
 
 module.exports = {
