@@ -176,6 +176,7 @@ class NetworkClient {
   }
   stop() {
     clearTimeout(this.gameupdateTimeout);
+    clearInterval(this.syninterval);
   }
 }
 
