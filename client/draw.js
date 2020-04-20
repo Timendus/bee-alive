@@ -3,30 +3,54 @@ const Textures = require('./textures');
 module.exports = frame => {
   drawBackground(frame);
 
-  if ( frame.state.finished )
-    return drawFinishedState(frame, frame.state.winning);
+  if ( !frame.state.playing && frame.state.remaining <= 1 )
+    return drawFinishedState(frame, frame.state.winning, frame.state.boids);
 
   drawRemainingTime(frame, frame.state.remaining);
   drawHives(frame, frame.state.teams);
   drawBoids(frame, frame.state.boids);
   drawPlayers(frame, frame.state.players);
+
+  if ( !frame.state.playing )
+    drawInstruction(frame);
 }
 
 function drawBackground(frame) {
   frame.ctx.drawImage(Textures.background, 0, 0, 1024 * frame.scale, 1024 * frame.scale);
 }
 
-function drawFinishedState(frame, winning) {
+function drawFinishedState(frame, winning, boids) {
   // Really ugly, but compact ;)
   const winningText = winning.length > 1 ? "It's a Tie!" :
     winning[0].id == 0 ? "The Blue Team Won!" :
                          "The Purple Team Won!";
 
+  const teamAscore = boids.filter(b => b.teamId == 0).length;
+  const teamBscore = boids.filter(b => b.teamId == 1).length;
+  const scoreText = teamAscore > teamBscore ? `With ${teamAscore} against ${teamBscore} bees` :
+                                              `With ${teamBscore} against ${teamAscore} bees`
+
   frame.ctx.textAlign = 'center';
   frame.ctx.font = '48px Indie Flower';
-  frame.ctx.fillText(winningText, 512 * frame.scale, 450 * frame.scale);
+  frame.ctx.fillText(winningText, 512 * frame.scale, 430 * frame.scale);
   frame.ctx.font = '30px Indie Flower';
-  frame.ctx.fillText("Press ... some key? ... to play again!", 512 * frame.scale, 520 * frame.scale);
+  frame.ctx.fillText(scoreText, 512 * frame.scale, 490 * frame.scale);
+  frame.ctx.fillText("Press a key to play again!", 512 * frame.scale, 540 * frame.scale);
+}
+
+function drawInstruction(frame) {
+  frame.ctx.textAlign = 'center';
+  frame.ctx.font = '48px Indie Flower';
+  frame.ctx.fillText("Press R when you're ready!", 512 * frame.scale, 380 * frame.scale);
+  frame.ctx.font = '30px Indie Flower';
+  frame.ctx.fillText("Use the WSAD keys to move around", 512 * frame.scale, 460 * frame.scale);
+  frame.ctx.fillText("and claim all the worker bees!", 512 * frame.scale, 520 * frame.scale);
+
+  let ycoord = 600;
+  frame.state.players.forEach(player => {
+    frame.ctx.fillText(`Player ${player.id + 1}: ${player.ready ? 'Ready!' : 'Not ready'}`, 512 * frame.scale, ycoord * frame.scale);
+    ycoord += 50;
+  });
 }
 
 function drawRemainingTime(frame, remaining) {

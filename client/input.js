@@ -20,6 +20,8 @@ class Input {
         return 'down';
       case 'd':
         return 'right';
+      case 'r':
+        return 'ready';
       default:
         return null;
     }

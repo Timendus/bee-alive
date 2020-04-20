@@ -37,7 +37,7 @@ class BeeGame {
     const state = {
       frame: 0,
       remaining: gameDuration * 30,
-      finished: false,
+      playing: false,
       winning: [],
       players: [],
       teams: teams,
@@ -60,15 +60,15 @@ class BeeGame {
 
   update(state, events) {
     state = events.reduce(handleEvent, state)
-    const finished = state.remaining < 1;
+    const playing = areWePlaying(state);
     state = {
       ...state,
       frame: state.frame + 1,
-      remaining: state.remaining - 1,
-      finished: finished,
+      remaining: playing ? state.remaining - 1 : state.remaining,
+      playing: playing,
       winning: winningTeams(state.teams, state.boids),
-      players: finished ? state.players : state.players.map(player => updatePlayer(player)),
-      boids: finished ? state.boids : updateBoids(state.boids, { players: state.players })
+      players: !playing ? state.players : state.players.map(player => updatePlayer(player)),
+      boids: !playing ? state.boids : updateBoids(state.boids, { players: state.players })
                                       .concat(newBoids(state.frame, state.randomBoids)),
     };
     log.debug("Update state", { state, events });
@@ -89,6 +89,12 @@ class BeeGame {
 
 const maxSpeed = 1000;
 const maxForce = 0.01;
+
+function areWePlaying(state) {
+  if (state.players.some(p => !p.ready))
+    return false;
+  return state.remaining > 1;
+}
 
 function createBoidSwarm({ center, count, teamId }) {
   const boids = [];
@@ -486,7 +492,14 @@ function createPlayer({ id, teamId = null }) {
   const team = teams[teamId];
   const position = team.position;
   const velocity = zeroV;
-  return { id: id, position, velocity, input: {}, teamId };
+  return {
+    id: id,
+    position,
+    velocity,
+    input: {},
+    teamId,
+    ready: false
+  };
 }
 
 function handlePlayerEvent(players, event) {
@@ -509,6 +522,7 @@ function handlePlayerEvent(players, event) {
 function handlePlayerInput(player, input) {
   return {
     ...player,
+    ready: (input.key == 'ready' && input.direction == 'up') ? !player.ready : player.ready,
     input: {
       ...player.input,
       [input.key]: input.direction === 'down',
