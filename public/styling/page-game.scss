@@ -6,11 +6,13 @@
     min-height: calc(100vh - 4em - 4px);
 
     aside {
+      overflow-y: auto;
+      max-height: calc(100vh - 4em - 4px);
       padding: 1rem;
       border-right: 4px solid #ffe72d;
 
-      .player-list {
-        margin-top: 1.5em;
+      .chat, .player-list {
+        margin-top: 1.8em;
       }
     }
 
