@@ -546,7 +546,6 @@ function handleEvent(state, event) {
 }
 
 function createPlayer({ id, teamId = null, name }) {
-  teamId = teamId || (id % 2)
   const team = teams[teamId];
   const position = team.position;
   const velocity = zeroV;
@@ -564,7 +563,11 @@ function createPlayer({ id, teamId = null, name }) {
 function handlePlayerEvent(players, event) {
   switch (event.type) {
     case "connect":
-      return [...players, createPlayer({ id: event.clientid, teamId: event.teamId, name: event.clientName })]
+      return [...players, createPlayer({
+        id: event.clientid,
+        teamId: event.teamId || smallestTeam(players),
+        name: event.clientName
+      })];
     case "disconnect":
       return players.filter((player) => player.id !== event.clientid);
     case "game-input":
@@ -576,6 +579,12 @@ function handlePlayerEvent(players, event) {
     default:
       return players;
   }
+}
+
+function smallestTeam(players) {
+  const team0 = players.filter(p => p.teamId === 0).length;
+  const team1 = players.filter(p => p.teamId === 1).length;
+  return team0 > team1 ? 1 : 0;
 }
 
 function handlePlayerInput(player, input) {
