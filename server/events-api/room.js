@@ -12,18 +12,18 @@ class Room {
   }
 
   joinSocket(socket, name) {
-    this._messenger = new SocketIOMessenger(socket);
-    this._networkClient = this._networkServer.createClient(this._messenger, name);
+    socket.messenger = new SocketIOMessenger(socket);
+    socket.networkClient = this._networkServer.createClient(socket.messenger, name);
     socket.join(this.roomId);
   }
 
   leaveSocket(socket) {
-    if (!this._networkClient) {
+    if (!socket.networkClient) {
       throw new Error('The socket does not have a client');
     }
     socket.leave(this.roomId);
-    this._messenger.close();
-    this._networkServer.removeClient(this._networkClient);
+    socket.messenger.close();
+    this._networkServer.removeClient(socket.networkClient);
   }
 
   close() {
