@@ -336,14 +336,15 @@ function teamCenter(team) {
 function takeOverNearestBoid(winner, loser) {
   // TODO: don't take over all boids ;)
   const takeOverDistance = 200;
-  if (winner.boids.length == 0) return;
+  if (winner.boids.length == 0 && winner.allies.length == 0) return;
+  const winnerTeam = (winner.boids[0] || winner.allies[0]).teamId
   const center = teamCenter(winner);
   for (const boid of loser.boids) {
     const distance = distanceV(boid.position, center);
     if (distance >= takeOverDistance) {
       continue;
     }
-    boid.teamId = winner.boids[0].teamId;
+    boid.teamId = winnerTeam;
   }
 }
 
