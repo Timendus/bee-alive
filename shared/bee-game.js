@@ -63,7 +63,7 @@ class BeeGame {
         ),
       ],
       randomBoids: [
-        ...randomBoids(10, gameDuration * framesPerSecond, random)
+        ...randomBoids(0, 10, gameDuration * framesPerSecond, random)
       ]
     };
     log.debug("Init state", { state });
@@ -143,7 +143,7 @@ class BeeGame {
             ),
           ],
           randomBoids: [
-            ...randomBoids(10, gameDuration * framesPerSecond, random)
+            ...randomBoids(state.frame, 10, gameDuration * framesPerSecond, random)
           ]
         }
         break;
@@ -210,11 +210,11 @@ function newBoids(frame, randomBoids) {
   return randomBoids.filter(b => b.frame == frame);
 }
 
-function randomBoids(numberOfBoids, frames, random) {
+function randomBoids(frame, numberOfBoids, frames, random) {
   const boids = [];
   for ( let i = 0; i < numberOfBoids; i++ ) {
     boids.push({
-      frame: random.nextInt(0, frames),
+      frame: random.nextInt(frame, frame + frames),
       position: teams[random.nextInt(0,1)].position,
       velocity: multiplyV(random.nextNormalizedVector(), random.nextFloat(0, 3)),
       teamId: teams[2].id
@@ -307,8 +307,8 @@ function duel(teams) {
 }
 
 function teamSpread(team) {
-  const xCoords = team.boids.map(b => b.position.x);
-  const yCoords = team.boids.map(b => b.position.y);
+  const xCoords = team.boids.map(b => b.position.x).concat(team.allies.map(a => a.position.x));
+  const yCoords = team.boids.map(b => b.position.y).concat(team.allies.map(a => a.position.y));
   const boundingBox = {
     width: Math.max(...xCoords) - Math.min(...xCoords),
     height: Math.max(...yCoords) - Math.min(...yCoords)
