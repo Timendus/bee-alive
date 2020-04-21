@@ -79,7 +79,7 @@ module.exports = async io => {
         if ( Object.keys(rooms).includes(room) )
           io.to(room).emit('roomMessage', {
             client:   socket.id,
-            userName: playerName(socket.id),
+            userName: htmlEntities(playerName(socket.id)),
             message
           });
       });
@@ -89,13 +89,12 @@ module.exports = async io => {
       message = htmlEntities(message);
       io.emit('lobbyMessage', {
         client:   socket.id,
-        userName: playerName(socket.id),
+        userName: htmlEntities(playerName(socket.id)),
         message
       });
     });
 
     socket.on('setName', async name => {
-      name = htmlEntities(name);
       playerNames[socket.id] = name;
       Object.keys(socket.rooms).forEach(roomId => {
         updatePlayerList(roomId);
@@ -146,7 +145,7 @@ module.exports = async io => {
         if (error) reject(error);
         resolve(clients.map(c => ({
           client: c,
-          userName: playerName(c)
+          userName: htmlEntities(playerName(c))
         })));
       });
     });
@@ -156,7 +155,7 @@ module.exports = async io => {
     return Object.values(io.connected)
                  .map(client => ({
       client: client.id,
-      userName: playerName(client.id),
+      userName: htmlEntities(playerName(client.id)),
       inRoom: Object.keys(client.rooms).length > 1
     }));
   }
