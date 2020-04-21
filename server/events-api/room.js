@@ -55,7 +55,7 @@ module.exports = async io => {
       }
       const room = rooms[roomId];
       socket.emit('room-joined', roomId);
-      room.joinSocket(socket, playerName(socket.id));
+      room.joinSocket(socket, playerName(socket.id, true));
       updatePlayerList(roomId);
     });
 
@@ -79,7 +79,7 @@ module.exports = async io => {
         if ( Object.keys(rooms).includes(room) )
           io.to(room).emit('roomMessage', {
             client:   socket.id,
-            userName: htmlEntities(playerName(socket.id)),
+            userName: playerName(socket.id),
             message
           });
       });
@@ -89,7 +89,7 @@ module.exports = async io => {
       message = htmlEntities(message);
       io.emit('lobbyMessage', {
         client:   socket.id,
-        userName: htmlEntities(playerName(socket.id)),
+        userName: playerName(socket.id),
         message
       });
     });
@@ -130,9 +130,11 @@ module.exports = async io => {
     io.emit('lobbyPlayers', players);
   }
 
-  function playerName(socketId) {
-    return playerNames[socketId] ||
+  function playerName(socketId, unsafe=false) {
+    const name = playerNames[socketId] ||
       "Anonymous Player " + socketId.substr(-3).toUpperCase();
+    if ( unsafe ) return name;
+    return htmlEntities(name);
   }
 
   function htmlEntities(str) {
@@ -145,7 +147,7 @@ module.exports = async io => {
         if (error) reject(error);
         resolve(clients.map(c => ({
           client: c,
-          userName: htmlEntities(playerName(c))
+          userName: playerName(c)
         })));
       });
     });
@@ -155,7 +157,7 @@ module.exports = async io => {
     return Object.values(io.connected)
                  .map(client => ({
       client: client.id,
-      userName: htmlEntities(playerName(client.id)),
+      userName: playerName(client.id),
       inRoom: Object.keys(client.rooms).length > 1
     }));
   }
