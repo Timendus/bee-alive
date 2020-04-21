@@ -16,3 +16,8 @@ yarn run dev # or npm run dev
 ```
 
 This will run on port `8000`
+
+### Contributors
+Lead programmers: [@bobvanderlinden](https://github.com/bobvanderlinden), [@nickschot](https://github.com/nickschot) & [@timendus](https://github.com/Timendus)
+Designers: [@minthamie](https://github.com/MinThaMie) & [@mirandavdende](https://github.com/mirandavdende)
+Sound: [@srekke](https://github.com/srekke)
