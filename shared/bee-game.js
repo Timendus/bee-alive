@@ -63,7 +63,7 @@ class BeeGame {
         ),
       ],
       randomBoids: [
-        ...randomBoids(10, gameDuration * framesPerSecond, random)
+        ...randomBoids(0, 10, gameDuration * framesPerSecond, random)
       ]
     };
     log.debug("Init state", { state });
@@ -143,7 +143,7 @@ class BeeGame {
             ),
           ],
           randomBoids: [
-            ...randomBoids(10, gameDuration * framesPerSecond, random)
+            ...randomBoids(state.frame, 10, gameDuration * framesPerSecond, random)
           ]
         }
         break;
@@ -210,11 +210,11 @@ function newBoids(frame, randomBoids) {
   return randomBoids.filter(b => b.frame == frame);
 }
 
-function randomBoids(numberOfBoids, frames, random) {
+function randomBoids(frame, numberOfBoids, frames, random) {
   const boids = [];
   for ( let i = 0; i < numberOfBoids; i++ ) {
     boids.push({
-      frame: random.nextInt(0, frames),
+      frame: random.nextInt(frame, frame + frames),
       position: teams[random.nextInt(0,1)].position,
       velocity: multiplyV(random.nextNormalizedVector(), random.nextFloat(0, 3)),
       teamId: teams[2].id
