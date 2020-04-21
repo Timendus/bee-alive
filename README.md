@@ -1,8 +1,12 @@
-# Plumbing
+# Bee Alive!
 
-Spul om lekker snel aan de slag te kunnen voor Ludum Dare 46.
+A multiplayer game created for [Ludum Dare 46](https://ldjam.com/events/ludum-dare/46/bee-alive). The goal of the game is to gather more bees then your friends. Either by taking the bees that fly around or by taking them from your opponent.
 
-## Installeren
+This game works in the browser. It was tested in the latest Safari, FireFox and Chrome. 
+
+You can move your queen bee with `WASD`.
+
+## Install
 
 ```bash
 git clone git@github.com:Timendus/plumbing.git
@@ -11,5 +15,4 @@ yarn install # or npm install
 yarn run dev # or npm run dev
 ```
 
-Er draait nu een "Hello World" op poort 8000. Als dat je niet bevalt kun je het
-poortnummer aanpassen in `package.json`.
+This will run on port `8000`
