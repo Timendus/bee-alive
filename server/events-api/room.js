@@ -55,7 +55,7 @@ module.exports = async io => {
       }
       const room = rooms[roomId];
       socket.emit('room-joined', roomId);
-      room.joinSocket(socket, playerName(socket.id));
+      room.joinSocket(socket, playerName(socket.id, true));
       updatePlayerList(roomId);
     });
 
@@ -95,7 +95,6 @@ module.exports = async io => {
     });
 
     socket.on('setName', async name => {
-      name = htmlEntities(name);
       playerNames[socket.id] = name;
       Object.keys(socket.rooms).forEach(roomId => {
         updatePlayerList(roomId);
@@ -131,9 +130,11 @@ module.exports = async io => {
     io.emit('lobbyPlayers', players);
   }
 
-  function playerName(socketId) {
-    return playerNames[socketId] ||
+  function playerName(socketId, unsafe=false) {
+    const name = playerNames[socketId] ||
       "Anonymous Player " + socketId.substr(-3).toUpperCase();
+    if ( unsafe ) return name;
+    return htmlEntities(name);
   }
 
   function htmlEntities(str) {
