@@ -307,8 +307,8 @@ function duel(teams) {
 }
 
 function teamSpread(team) {
-  const xCoords = team.boids.map(b => b.position.x);
-  const yCoords = team.boids.map(b => b.position.y);
+  const xCoords = team.boids.map(b => b.position.x).concat(team.allies.map(a => a.position.x));
+  const yCoords = team.boids.map(b => b.position.y).concat(team.allies.map(a => a.position.y));
   const boundingBox = {
     width: Math.max(...xCoords) - Math.min(...xCoords),
     height: Math.max(...yCoords) - Math.min(...yCoords)
